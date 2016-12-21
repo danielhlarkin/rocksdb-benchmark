@@ -1,0 +1,140 @@
+= An experiment to gauge performance of RocksDB =
+Max Neunhöffer <max@arangodb.com>
+V1.0, 19.12.2016: Initial draft
+
+This document describes the design of an experiment to investigate whether
+our plans w.r.t. an ArangoDB based on RocksDB are viable. Nobody doubts that
+it will "work" in the end, the critical question is with what performance and
+with what memory consumption. Therefore, this experiment is a simulation
+of the final implementation, in particular w.r.t. the events done in RocksDB.
+
+== The experiment ==
+
+We imagine that a user of the new ArangoDB does the following:
+
+1. Create a collection "c".
+
+2. Create a persisted index on the "timeStamp" attribute.
+
+3. Store a number of W documents in the collection c of the form:
+
+    { "value": <number>, "name": <string>, "timeStamp": <string> }
+
+`_key` attributes will be generated automatically, we can simply use
+ascending numbers as strings. `_rev` attributes will be generated
+automatically, we can use the hybrid logical clock for these. `_id`
+are simply `"c/"` concatenated with the `_key` attribute.
+
+W should be configurable for "in-memory" and "out-of-memory" situations.
+Measure times of individual operations to look at latencies. Run two
+cases one "single-threaded", and one "multiple threads at the same time",
+the number of threads should be configurable.
+
+4. Perform a number R of single-document read operations with total random
+access (random `_key`s). Measure individual times to look at latencies.
+Number of threads configurable.
+
+5. Perform a number R of single-document read operations restricted to
+a set of H keys with H << R. Measure individual times to look at latencies.
+Number of threads configurable.
+
+6. Perform a range query on timeStamp and extract all resulting documents.
+
+7. Remove all documents again, one by one. Measure individual times.
+Number of threads configurable.
+
+For all stages we would like to measure latencies and observe the memory
+used (virtual, resident and disk, say every second).
+
+
+== RocksDB integration ==
+
+We do not want to implement the whole RocksDB-based engine for this experiment.
+Thus, we just write a standalone C++ program talking to RocksDB. The crucial
+thing is that we hit RocksDB with exactly those operations that it would be
+hit in our current plan for ArangoDB/RocksDB integration.
+
+Here is how things would be put into the RocksDB key space:
+
+`<db-id>` = uint64_t       Database-ID
+`<coll-id>` = uint64_t     Collection-ID
+`<rev-id>` = uint64_t      Revision-ID
+
+All would be stored as big endian (even on x86_64!) such that the RocksDB
+sorting is compatible with ascending uint64_t values.
+
+A document would be stored in this way:
+
+    d <db-id> <coll-id> <rev-id>   maps to   vpack
+
+where `d` is the ASCII-letter "d" for document.
+
+Index-Entry, in primary index or other persisted index:
+
+    i <db-id> <coll-id> <idx-id> {vpack-index-values} <key> <rev-id>  maps to <b>
+
+`<key>` is a VPack to be able to read off the length and `b` is a byte with
+value 0 for a tombstone and value 1 for a document.
+
+This is what is relevant for the proposed experiment. For the sake of
+completeness, here is what we would put for metadata like collections
+and databases:
+
+Databases:
+
+    D <db-id>    maps to    vpack
+
+Collections:
+
+    C <db-id> <coll-id>    maps to   vpack
+
+Indexes:
+
+    I <db-id> <coll-id> <index-id>    maps to   vpack
+
+Views:
+
+    V <db-id> <view-id>    maps to   vpack
+
+
+== Implementation ==
+
+The test is implemented as a standalone C++ program using RocksDB (if possible
+exactly as we use it in ArangoDB). We do use the VelocyPack libraries to
+produce VPack values (Builder is probably enough).
+
+We use `C++11` operations for multiple threads, configuration is via the
+command line.
+
+We do not have to do anything for steps 1. and 2. (creation of collection
+and index).
+
+For 3. a single store is a write of the document, of the entry for the
+primary index (index value is just the key, so `<index-values>` and `<key>`
+are the same here), and of the entry for the secondary index on `timeStamp`.
+Here, the index value would be the timeStamp itself (as VPack) and this
+would be followed by the key and the revision. All three writes would be
+done in a single RocksDB transaction (or a write batch or whatever).
+
+This is not completely realistic, because later we would probably write the
+document first to the write ahead log and only the collection procedure
+would put it into RocksDB in the background. Nevertheless, what we try here
+is to write it directly to RocksDB.
+
+For 4. and 5., a read looks up a key in the primary index, get the revision
+and then look up the actual document by its revision in a two step procedure.
+
+For 6., a range query in the secondary index is done and all found revisions
+are looked up.
+
+For 7., for each document all three places would be deleted in a single
+RocksDB transaction.
+
+
+== Things measured ==
+
+For all experiments we would like to see the latencies of individual
+single-document operations as well as the throughput (in view of
+multiple threads). Furthermore, we want to measure the complete runtimes
+for each of the 7 steps. Finally, we need the memory footprint (virtual
+size, resident size and on disk size), basically throughout all experiments.

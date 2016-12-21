@@ -1,0 +1,9 @@
+[submodule "3rdParty/velocypack"]
+	path = 3rdParty/velocypack
+	url = https://github.com/arangodb/velocypack.git
+[submodule "3rdParty/rocksdb"]
+	path = 3rdParty/rocksdb
+	url = https://github.com/facebook/rocksdb.git
+[submodule "3rdParty/q-digest"]
+	path = 3rdParty/q-digest
+	url = https://github.com/danielhlarkin/q-digest.git
