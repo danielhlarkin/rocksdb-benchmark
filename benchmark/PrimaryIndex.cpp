@@ -6,6 +6,14 @@ PrimaryIndex::PrimaryIndex(std::string const& folder, std::string const& prefix)
 
 PrimaryIndex::~PrimaryIndex() {}
 
+std::string PrimaryIndex::buildPrefix(uint64_t databaseId,
+                                      uint64_t collectionId, uint64_t indexId) {
+  return std::string("d")
+      .append(std::to_string(databaseId))
+      .append(std::to_string(collectionId))
+      .append(std::to_string(indexId));
+}
+
 bool PrimaryIndex::insert(std::string const& key, uint64_t revision,
                           arangodb::velocypack::Slice const& value) {
   return true;

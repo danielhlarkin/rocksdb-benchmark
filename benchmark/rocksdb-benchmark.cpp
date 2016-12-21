@@ -1,11 +1,13 @@
+#include <benchmark/Suite.h>
 #include <stdlib.h>
 #include <iostream>
+#include <string>
 
 int main(int argc, char** argv) {
-  if (argc < 6) {
+  if (argc < 7) {
     std::cerr << "Incorrect number of parameters! Correct usage is "
                  "`rocksdb-benchmark [threadCount] [keyCount] [lookupCount] "
-                 "[hotsetCount] [rangeLimit]`."
+                 "[hotsetCount] [rangeLimit] [folder]`."
               << std::endl;
     return -1;
   }
@@ -14,14 +16,11 @@ int main(int argc, char** argv) {
   uint64_t lookupCount = atoll(argv[3]);
   uint64_t hotsetCount = atoll(argv[4]);
   uint64_t rangeLimit = atoll(argv[5]);
+  std::string folder(argv[6]);
 
-  std::cout << "Benchmarking RocksDB with parameters {" << std::endl
-            << "  threadCount: " << threadCount << "," << std::endl
-            << "  keyCount = " << keyCount << "," << std::endl
-            << "  lookupCount: " << lookupCount << "," << std::endl
-            << "  hotsetCount: " << hotsetCount << "," << std::endl
-            << "  rangeLimit: " << rangeLimit << std::endl
-            << "}" << std::endl;
+  benchmark::Suite suite(threadCount, keyCount, lookupCount, hotsetCount,
+                         rangeLimit, folder);
+  suite.printConfig();
 
   return 0;
 }

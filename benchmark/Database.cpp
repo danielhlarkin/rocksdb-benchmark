@@ -3,9 +3,18 @@
 using namespace benchmark;
 Database::Database(std::string const& folder)
     : _folder(folder),
-      _storageEngine(_folder),
-      _primaryIndex(_folder),
-      _secondaryIndex(_folder) {}
+      _random(0xdeadbeefdeadbeefULL),
+      _databaseId(_random.next()),
+      _collectionId(_random.next()),
+      _primaryIndexId(_random.next()),
+      _secondaryIndexId(_random.next()),
+      _storageEngine(_folder,
+                     StorageEngine::buildPrefix(_databaseId, _collectionId)),
+      _primaryIndex(_folder, PrimaryIndex::buildPrefix(
+                                 _databaseId, _collectionId, _primaryIndexId)),
+      _secondaryIndex(_folder,
+                      SecondaryIndex::buildPrefix(_databaseId, _collectionId,
+                                                  _secondaryIndexId)) {}
 
 Database::~Database() {}
 

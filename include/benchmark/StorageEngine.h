@@ -17,6 +17,8 @@ class StorageEngine {
   StorageEngine(std::string const& folder, std::string const& prefix);
   ~StorageEngine();
 
+  static std::string buildPrefix(uint64_t databaseId, uint64_t collectionId);
+
   bool insert(uint64_t revision, Slice const& value);
   bool remove(uint64_t revision);
   Slice lookup(uint64_t revision);

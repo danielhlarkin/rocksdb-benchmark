@@ -18,6 +18,9 @@ class PrimaryIndex {
   PrimaryIndex(std::string const& folder, std::string const& prefix);
   ~PrimaryIndex();
 
+  static std::string buildPrefix(uint64_t databaseId, uint64_t collectionId,
+                                 uint64_t indexId);
+
   bool insert(std::string const& key, uint64_t revision,
               arangodb::velocypack::Slice const& value);
   bool remove(std::string const& key, uint64_t revision);

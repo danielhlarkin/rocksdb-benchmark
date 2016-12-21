@@ -3,6 +3,7 @@
 
 #include <benchmark/HybridLogicalClock.h>
 #include <benchmark/PrimaryIndex.h>
+#include <benchmark/RandomNumber.h>
 #include <benchmark/SecondaryIndex.h>
 #include <benchmark/StorageEngine.h>
 #include <velocypack/vpack.h>
@@ -15,6 +16,11 @@ class Database {
 
   std::string _folder;
   benchmark::HybridLogicalClock _clock;
+  benchmark::RandomNumber _random;
+  uint64_t _databaseId;
+  uint64_t _collectionId;
+  uint64_t _primaryIndexId;
+  uint64_t _secondaryIndexId;
   benchmark::StorageEngine _storageEngine;
   benchmark::PrimaryIndex _primaryIndex;
   benchmark::SecondaryIndex _secondaryIndex;

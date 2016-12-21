@@ -7,6 +7,13 @@ StorageEngine::StorageEngine(std::string const& folder,
 
 StorageEngine::~StorageEngine() {}
 
+std::string StorageEngine::buildPrefix(uint64_t databaseId,
+                                       uint64_t collectionId) {
+  return std::string("d")
+      .append(std::to_string(databaseId))
+      .append(std::to_string(collectionId));
+}
+
 bool StorageEngine::insert(uint64_t revision, Slice const& value) {
   return true;
 }
