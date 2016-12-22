@@ -20,7 +20,7 @@ CLI parameter `folder`. The workloads are as follows.
         _key: <string>
         value: <uint64>
         name: <string>
-        timestamp: <uint64>
+        timestamp: <UTC-date>
       }
       ```
       where the `value` field is a randomly chosen integer, the `name` field is
@@ -104,15 +104,19 @@ keys to revision IDs. Entries in the secondary index are indexed by `timestamp`.
 ## Building
 
 We use a few third-party submodules which must be initialized. Further more, two
-of these submodules must be built separately from our standard `cmake` step.
-Something like the following would suffice.
+of these submodules must be built separately from our standard `cmake` step, and
+one of these requires a small change to its build process Something like the
+following would suffice.
+
 ```
 git clone {REPOSITORY} {SRC_DIR}
 cd {SRC_DIR}
 git submodule init
 cd 3rdParty/rocksdb
 make shared_lib
-cd ../velocypack/build
+cd ../velocypack
+sed 's/add_library(velocypack STATIC/add_library(velocypack SHARED/g'
+cd build
 cmake ..
 make
 cd ../..

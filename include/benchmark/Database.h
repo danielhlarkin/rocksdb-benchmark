@@ -12,7 +12,8 @@
 namespace benchmark {
 class Database {
  private:
-  typedef arangodb::velocypack::Slice Slice;
+  typedef arangodb::velocypack::Slice VPackSlice;
+  typedef arangodb::velocypack::SliceContainer VPackSliceContainer;
 
   std::string _folder;
   benchmark::HybridLogicalClock _clock;
@@ -29,10 +30,13 @@ class Database {
   Database(std::string const& folder);
   ~Database();
 
-  bool insert(std::string const& key, Slice const& value);
+  uint64_t insert(std::string const& key, VPackSlice const& value);
   bool remove(std::string const& key);
-  Slice lookupSingle(std::string const& key);
-  std::vector<Slice> lookupRange(Slice const& start, Slice const& end);
+  VPackSliceContainer lookupSingle(std::string const& key,
+                                   uint64_t maxRevision) const;
+  std::vector<VPackSliceContainer> lookupRange(VPackSlice const& start,
+                                               VPackSlice const& end,
+                                               uint64_t maxRevision) const;
 };
 }
 

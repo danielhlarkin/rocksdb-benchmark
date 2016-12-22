@@ -21,6 +21,8 @@ include_directories(
 )
 
 add_library(RocksDBBenchmark OBJECT
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/ArangoComparator.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/ArangoPrefixTransform.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/Database.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/HybridLogicalClock.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/Mutex.cpp
@@ -31,13 +33,10 @@ add_library(RocksDBBenchmark OBJECT
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/SecondaryIndex.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/StorageEngine.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/Suite.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/utility.cpp
 )
 
-add_executable(rocksdb-benchmark
-  $<TARGET_OBJECTS:RocksDBBenchmark>
-  benchmark/rocksdb-benchmark.cpp
-)
-target_link_libraries(rocksdb-benchmark PRIVATE
+set(LIBRARY_LIST
   ${CMAKE_THREAD_LIBS_INIT}
   ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/rocksdb/librocksdb.so
   ${ZLIB_LIBRARIES}
@@ -45,5 +44,35 @@ target_link_libraries(rocksdb-benchmark PRIVATE
   snappy
   jemalloc
   -ldl
-  ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/velocypack/build/libvelocypack.a
+  ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/velocypack/build/libvelocypack.so
 )
+
+add_executable(StorageEngineTest
+  $<TARGET_OBJECTS:RocksDBBenchmark>
+  tests/StorageEngineTest.cpp
+)
+target_link_libraries(StorageEngineTest PRIVATE ${LIBRARY_LIST})
+
+add_executable(PrimaryIndexTest
+  $<TARGET_OBJECTS:RocksDBBenchmark>
+  tests/PrimaryIndexTest.cpp
+)
+target_link_libraries(PrimaryIndexTest PRIVATE ${LIBRARY_LIST})
+
+add_executable(SecondaryIndexTest
+  $<TARGET_OBJECTS:RocksDBBenchmark>
+  tests/SecondaryIndexTest.cpp
+)
+target_link_libraries(SecondaryIndexTest PRIVATE ${LIBRARY_LIST})
+
+add_executable(DatabaseTest
+  $<TARGET_OBJECTS:RocksDBBenchmark>
+  tests/DatabaseTest.cpp
+)
+target_link_libraries(DatabaseTest PRIVATE ${LIBRARY_LIST})
+
+add_executable(rocksdb-benchmark
+  $<TARGET_OBJECTS:RocksDBBenchmark>
+  benchmark/rocksdb-benchmark.cpp
+)
+target_link_libraries(rocksdb-benchmark PRIVATE ${LIBRARY_LIST})
