@@ -14,7 +14,7 @@ find_package(BZip2 REQUIRED)
 #list(APPEND CMAKE_EXE_LINKER_FLAGS "-O0 -g -fprofile-arcs -ftest-coverage -DNDEBUG ${CMAKE_EXE_LINKER_FLAGS}")
 
 include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/qdigest
+  ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty
   ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/rocksdb/include
   ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/velocypack/include
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
@@ -23,6 +23,7 @@ include_directories(
 add_library(RocksDBBenchmark OBJECT
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/ArangoComparator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/ArangoPrefixTransform.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/BatchInsert.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/Database.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/HybridLogicalClock.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/Mutex.cpp
@@ -33,10 +34,14 @@ add_library(RocksDBBenchmark OBJECT
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/SecondaryIndex.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/StorageEngine.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/Suite.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/UsageMonitor.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/utility.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/Workload.cpp
 )
 
 set(LIBRARY_LIST
+  ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/q-digest/build/libqdigest.so
+  ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/velocypack/build/libvelocypack.so
   ${CMAKE_THREAD_LIBS_INIT}
   ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/rocksdb/librocksdb.so
   ${ZLIB_LIBRARIES}
@@ -44,7 +49,6 @@ set(LIBRARY_LIST
   snappy
   jemalloc
   -ldl
-  ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/velocypack/build/libvelocypack.so
 )
 
 add_executable(StorageEngineTest

@@ -21,6 +21,7 @@ int main(int argc, char** argv) {
   benchmark::Suite suite(threadCount, keyCount, lookupCount, hotsetCount,
                          rangeLimit, folder);
   suite.printConfig();
+  suite.runAll();
 
   return 0;
 }

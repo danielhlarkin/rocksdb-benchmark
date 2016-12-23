@@ -16,7 +16,7 @@ Suite::Suite(uint64_t threadCount, uint64_t keyCount, uint64_t lookupCount,
 Suite::~Suite() {}
 
 void Suite::printConfig() {
-  std::cout << "Benchmarking RocksDB with parameters {" << std::endl
+  std::cout << "BENCHMARKING ROCKSDB WITH PARAMETERS {" << std::endl
             << "  threadCount: " << _threadCount << "," << std::endl
             << "  keyCount = " << _keyCount << "," << std::endl
             << "  lookupCount: " << _lookupCount << "," << std::endl
@@ -26,4 +26,16 @@ void Suite::printConfig() {
             << "}" << std::endl;
 }
 
-bool Suite::runAll() { return true; }
+bool Suite::runAll() {
+  BatchInsert batch(&_db, _threadCount, _keyCount, _lookupCount, _hotsetCount,
+                    _rangeLimit, _folder);
+
+  bool ok = batch.run();
+  if (!ok) {
+    std::cerr << "Batch insertion workload failed." << std::endl;
+    return false;
+  }
+  batch.printResults();
+
+  return true;
+}

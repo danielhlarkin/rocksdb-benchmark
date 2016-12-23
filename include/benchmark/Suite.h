@@ -1,6 +1,7 @@
 #ifndef ROCKSDB_BENCHMARK_SUITE_H
 #define ROCKSDB_BENCHMARK_SUITE_H 1
 
+#include <benchmark/BatchInsert.h>
 #include <benchmark/Database.h>
 #include <benchmark/RandomNumber.h>
 #include <stdint.h>
@@ -18,8 +19,8 @@ class Suite {
   uint64_t _lookupCount;
   uint64_t _hotsetCount;
   uint64_t _rangeLimit;
-
   std::string _folder;
+
   benchmark::Database _db;
 
  public:
