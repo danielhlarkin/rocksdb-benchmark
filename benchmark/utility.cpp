@@ -5,6 +5,8 @@
 using namespace benchmark;
 using namespace arangodb::velocypack;
 
+static RandomNumber r(0xdeadbeefdeadbeefULL);
+
 std::string utility::intToString(uint64_t n) {
   uint64_t r = __builtin_bswap64(n);  // assuming little-endian system
   return std::string(reinterpret_cast<char const*>(&r), sizeof(uint64_t));
@@ -25,7 +27,6 @@ SliceContainer utility::generateDocument(std::string const& key) {
 
 SliceContainer utility::generateDocument(std::string const& key,
                                          std::time_t timestamp) {
-  RandomNumber r(0xdeadbeefdeadbeefULL);
   Builder b;
 
   uint64_t value = r.next();

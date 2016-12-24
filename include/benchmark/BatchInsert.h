@@ -1,25 +1,39 @@
 #ifndef ROCKSDB_BENCHMARK_BATCH_INSERT_H
 #define ROCKSDB_BENCHMARK_BATCH_INSERT_H 1
 
+#include <benchmark/RandomNumber.h>
 #include <benchmark/Workload.h>
 
 namespace benchmark {
 
 struct BatchInsertInput {
+  benchmark::Database* db;
+  benchmark::Mutex* lock;
   uint64_t lower;
   uint64_t upper;
+  std::time_t* minTimestamp;
+  std::time_t* maxTimestamp;
+  std::atomic<uint64_t>* opCount;
   std::atomic<uint64_t>* workersDone;
   std::atomic<uint64_t>* workersErrored;
-  BatchInsertInput(uint64_t l, uint64_t u, std::atomic<uint64_t>* d,
-                   std::atomic<uint64_t>* e)
-      : lower(l), upper(u), workersDone(d), workersErrored(e) {}
+  BatchInsertInput(benchmark::Database* d, benchmark::Mutex* lk, uint64_t l,
+                   uint64_t u, std::time_t* minT, std::time_t* maxT,
+                   std::atomic<uint64_t>* ops, std::atomic<uint64_t>* done,
+                   std::atomic<uint64_t>* errored)
+      : db(d),
+        lock(lk),
+        lower(l),
+        upper(u),
+        minTimestamp(minT),
+        maxTimestamp(maxT),
+        opCount(ops),
+        workersDone(done),
+        workersErrored(errored) {}
 };
 
 class BatchInsert : public Workload {
  public:
-  BatchInsert(benchmark::Database* db, uint64_t threadCount, uint64_t keyCount,
-              uint64_t lookupCount, uint64_t hotsetCount, uint64_t rangeLimit,
-              std::string const& folder);
+  BatchInsert(WorkloadInitializationData const& data);
   ~BatchInsert();
 
  protected:
@@ -29,7 +43,8 @@ class BatchInsert : public Workload {
   void* generateWorkerInput(uint64_t i);
   WorkerType worker();
 
-  static void insertBatch(void* input, qdigest::QDigest* opDigest);
+  static void insertBatch(void* input, qdigest::QDigest* opDigest,
+                          timepoint* start, timepoint* end);
 };
 }
 
