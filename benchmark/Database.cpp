@@ -18,6 +18,8 @@ Database::Database(std::string const& folder)
 
 Database::~Database() {}
 
+uint64_t Database::now() { return _clock.getTimeStamp(); }
+
 uint64_t Database::insert(std::string const& key, VPackSlice const& value) {
   uint64_t revision = _clock.getTimeStamp();
 

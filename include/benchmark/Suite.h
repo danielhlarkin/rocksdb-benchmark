@@ -3,6 +3,8 @@
 
 #include <benchmark/BatchInsert.h>
 #include <benchmark/Database.h>
+#include <benchmark/HotsetLookup.h>
+#include <benchmark/RandomLookup.h>
 #include <benchmark/RandomNumber.h>
 #include <stdint.h>
 #include <velocypack/vpack.h>

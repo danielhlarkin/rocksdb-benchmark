@@ -80,6 +80,7 @@ class Workload {
 
  public:
   bool run();
+  void printHeader();
   void printResults();
 
  protected:
@@ -89,7 +90,6 @@ class Workload {
   virtual void* generateWorkerInput(uint64_t i) = 0;
   virtual WorkerType worker() = 0;
 
-  void printHeader();
   void printUsageStatistics();
   void printOpStatistics();
 

@@ -1,4 +1,6 @@
 #include <benchmark/PrimaryIndex.h>
+#include <chrono>
+#include <thread>
 
 using namespace benchmark;
 PrimaryIndex::PrimaryIndex(std::string const& folder, std::string const& prefix)
@@ -27,11 +29,14 @@ bool PrimaryIndex::insert(std::string const& key, uint64_t revision,
   auto it = _db->NewIterator(_readOptions);
   for (it->SeekForPrev(sentinel);
        it->Valid() && it->key().starts_with(keyPrefix); it->Prev()) {
-    if ((!tombstone && isTombstoned(it)) || (tombstone && !isTombstoned(it))) {
-      break;  // no matching entry; proceed to insert
-    } else {
-      delete it;
-      return false;  // matching entry; don't insert
+    if (sameKey(it, key)) {
+      if ((!tombstone && isTombstoned(it)) ||
+          (tombstone && !isTombstoned(it))) {
+        break;  // no matching entry; proceed to insert
+      } else {
+        delete it;
+        return false;  // matching entry; don't insert
+      }
     }
   }
   delete it;
@@ -93,6 +98,19 @@ std::string PrimaryIndex::buildKeySentinel(std::string const& key,
 bool PrimaryIndex::isTombstoned(rocksdb::Iterator const* it) const {
   return (std::string(reinterpret_cast<char const*>(it->value().data()),
                       it->value().size()) == _tombstone);
+}
+
+bool PrimaryIndex::sameKey(rocksdb::Iterator const* it,
+                           std::string const& key) const {
+  uint64_t prefixLength = _prefix.size() + 1;
+  uint64_t suffixLength = sizeof(uint64_t);
+
+  if (it->key().size() != prefixLength + key.size() + suffixLength) {
+    return false;
+  }
+
+  char const* base = it->key().data() + prefixLength;
+  return (memcmp(base, key.data(), key.size()) == 0);
 }
 
 uint64_t PrimaryIndex::unwrap(rocksdb::Iterator const* it) const {

@@ -11,10 +11,12 @@
 
 namespace benchmark {
 class Database {
- private:
+ public:
   typedef arangodb::velocypack::Slice VPackSlice;
   typedef arangodb::velocypack::SliceContainer VPackSliceContainer;
+  typedef arangodb::velocypack::ValueLength VPackValueLength;
 
+ private:
   std::string _folder;
   benchmark::HybridLogicalClock _clock;
   benchmark::RandomNumber _random;
@@ -29,6 +31,8 @@ class Database {
  public:
   Database(std::string const& folder);
   ~Database();
+
+  uint64_t now();
 
   uint64_t insert(std::string const& key, VPackSlice const& value);
   bool remove(std::string const& key);

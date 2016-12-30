@@ -25,10 +25,12 @@ add_library(RocksDBBenchmark OBJECT
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/ArangoPrefixTransform.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/BatchInsert.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/Database.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/HotsetLookup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/HybridLogicalClock.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/Mutex.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/MutexLocker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/PrimaryIndex.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/RandomLookup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/RandomNumber.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/RocksDBInstance.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/SecondaryIndex.cpp

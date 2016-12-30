@@ -76,13 +76,12 @@ bool Workload::run() {
   return (_workersDone.load() == _threadCount && _workersErrored.load() == 0);
 }
 
+void Workload::printHeader() { std::cout << resultsHeader() << std::endl; }
+
 void Workload::printResults() {
-  printHeader();
   printUsageStatistics();
   printOpStatistics();
 }
-
-void Workload::printHeader() { std::cout << resultsHeader() << std::endl; }
 
 void Workload::printUsageStatistics() {
   std::string resi50 = readableSpace(_residentDigest.percentile(0.50));

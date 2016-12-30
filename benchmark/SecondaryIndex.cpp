@@ -30,11 +30,14 @@ bool SecondaryIndex::insert(std::string const& key, uint64_t revision,
   auto it = _db->NewIterator(_readOptions);
   for (it->SeekForPrev(sentinel);
        it->Valid() && it->key().starts_with(keyPrefix); it->Prev()) {
-    if ((!tombstone && isTombstoned(it)) || (tombstone && !isTombstoned(it))) {
-      break;  // no matching entry; proceed to insert
-    } else {
-      delete it;
-      return false;  // matching entry; don't insert
+    if (sameKey(it, key)) {
+      if ((!tombstone && isTombstoned(it)) ||
+          (tombstone && !isTombstoned(it))) {
+        break;  // no matching entry; proceed to insert
+      } else {
+        delete it;
+        return false;  // matching entry; don't insert
+      }
     }
   }
   delete it;
@@ -156,6 +159,19 @@ std::time_t SecondaryIndex::timestamp(rocksdb::Iterator const* it) const {
 SecondaryIndex::VPackSlice SecondaryIndex::extract(std::string const& s) const {
   char const* base = s.data() + _prefix.size();
   return VPackSlice(base);
+}
+
+bool SecondaryIndex::sameKey(rocksdb::Iterator const* it,
+                             std::string const& key) const {
+  uint64_t prefixLength = _prefix.size() + 1;
+  uint64_t suffixLength = sizeof(uint64_t);
+
+  if (it->key().size() != prefixLength + key.size() + suffixLength) {
+    return false;
+  }
+
+  char const* base = it->key().data() + prefixLength;
+  return (memcmp(base, key.data(), key.size()) == 0);
 }
 
 uint64_t SecondaryIndex::unwrap(rocksdb::Iterator const* it) const {

@@ -70,8 +70,9 @@ void BatchInsert::insertBatch(void* input, qdigest::QDigest* opDigest,
       std::string key(std::to_string(lower + current));
       VPackSliceContainer document = utility::generateDocument(key);
       auto start = std::chrono::high_resolution_clock::now();
-      db->insert(key, document.slice());
+      uint64_t r = db->insert(key, document.slice());
       auto end = std::chrono::high_resolution_clock::now();
+      assert(r > 0);
 
       opDigest->insert((end - start).count(), 1);
     }

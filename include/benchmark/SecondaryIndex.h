@@ -55,6 +55,7 @@ class SecondaryIndex {
   std::time_t timestamp(std::string const& s) const;
   std::time_t timestamp(rocksdb::Iterator const* it) const;
   VPackSlice extract(std::string const& s) const;
+  bool sameKey(rocksdb::Iterator const* it, std::string const& key) const;
   uint64_t unwrap(rocksdb::Iterator const* it) const;
 };
 }

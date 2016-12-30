@@ -31,13 +31,31 @@ bool Suite::runAll() {
                                       _lookupCount, _hotsetCount, _rangeLimit,
                                       _folder);
   BatchInsert batch(initData);
-
+  batch.printHeader();
   bool ok = batch.run();
   if (!ok) {
     std::cerr << "Batch insertion workload failed." << std::endl;
     return false;
   }
   batch.printResults();
+
+  RandomLookup random(initData);
+  random.printHeader();
+  ok = random.run();
+  if (!ok) {
+    std::cerr << "Random lookup workload failed." << std::endl;
+    return false;
+  }
+  random.printResults();
+
+  HotsetLookup hotset(initData);
+  hotset.printHeader();
+  ok = hotset.run();
+  if (!ok) {
+    std::cerr << "Hotset lookup workload failed." << std::endl;
+    return false;
+  }
+  hotset.printResults();
 
   return true;
 }

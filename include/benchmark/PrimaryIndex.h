@@ -40,6 +40,7 @@ class PrimaryIndex {
       uint64_t maxRevision = 0xFFFFFFFFFFFFFFFFULL) const;
 
   bool isTombstoned(rocksdb::Iterator const* it) const;
+  bool sameKey(rocksdb::Iterator const* it, std::string const& key) const;
   uint64_t unwrap(rocksdb::Iterator const* it) const;
 };
 }
