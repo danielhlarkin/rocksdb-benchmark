@@ -7,6 +7,7 @@
 #include <benchmark/MutexLocker.h>
 #include <rocksdb/cache.h>
 #include <rocksdb/db.h>
+#include <rocksdb/filter_policy.h>
 #include <rocksdb/options.h>
 #include <rocksdb/slice_transform.h>
 #include <rocksdb/table.h>
