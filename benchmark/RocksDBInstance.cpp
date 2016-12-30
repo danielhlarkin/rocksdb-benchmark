@@ -18,6 +18,7 @@ rocksdb::Options RocksDBInstance::generateOptions() {
   rocksdb::BlockBasedTableOptions tableOptions;
   tableOptions.cache_index_and_filter_blocks = true;
   tableOptions.filter_policy.reset(rocksdb::NewBloomFilterPolicy(12, false));
+  options.table_factory.reset(rocksdb::NewBlockBasedTableFactory(tableOptions));
 
   options.comparator = _comparator;
   options.prefix_extractor.reset(new ArangoPrefixTransform());
