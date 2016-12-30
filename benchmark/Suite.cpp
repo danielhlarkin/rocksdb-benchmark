@@ -39,32 +39,38 @@ bool Suite::runAll() {
   }
   batch.printResults();
 
-  RandomLookup random(initData);
-  random.printHeader();
-  ok = random.run();
-  if (!ok) {
-    std::cerr << "Random lookup workload failed." << std::endl;
-    return false;
+  if (_lookupCount > 0) {
+    RandomLookup random(initData);
+    random.printHeader();
+    ok = random.run();
+    if (!ok) {
+      std::cerr << "Random lookup workload failed." << std::endl;
+      return false;
+    }
+    random.printResults();
   }
-  random.printResults();
 
-  HotsetLookup hotset(initData);
-  hotset.printHeader();
-  ok = hotset.run();
-  if (!ok) {
-    std::cerr << "Hotset lookup workload failed." << std::endl;
-    return false;
+  if (_lookupCount > 0 && _hotsetCount > 0) {
+    HotsetLookup hotset(initData);
+    hotset.printHeader();
+    ok = hotset.run();
+    if (!ok) {
+      std::cerr << "Hotset lookup workload failed." << std::endl;
+      return false;
+    }
+    hotset.printResults();
   }
-  hotset.printResults();
 
-  RangeLookup range(initData, batch.minTimestamp(), batch.maxTimestamp());
-  range.printHeader();
-  ok = range.run();
-  if (!ok) {
-    std::cerr << "Range lookup workload failed." << std::endl;
-    return false;
+  if (_rangeLimit > 0) {
+    RangeLookup range(initData, batch.minTimestamp(), batch.maxTimestamp());
+    range.printHeader();
+    ok = range.run();
+    if (!ok) {
+      std::cerr << "Range lookup workload failed." << std::endl;
+      return false;
+    }
+    range.printResults();
   }
-  range.printResults();
 
   return true;
 }
