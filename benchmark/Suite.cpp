@@ -57,5 +57,14 @@ bool Suite::runAll() {
   }
   hotset.printResults();
 
+  RangeLookup range(initData, batch.minTimestamp(), batch.maxTimestamp());
+  range.printHeader();
+  ok = range.run();
+  if (!ok) {
+    std::cerr << "Range lookup workload failed." << std::endl;
+    return false;
+  }
+  range.printResults();
+
   return true;
 }

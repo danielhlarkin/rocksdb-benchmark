@@ -6,6 +6,7 @@
 #include <benchmark/HotsetLookup.h>
 #include <benchmark/RandomLookup.h>
 #include <benchmark/RandomNumber.h>
+#include <benchmark/RangeLookup.h>
 #include <stdint.h>
 #include <velocypack/vpack.h>
 #include <iostream>

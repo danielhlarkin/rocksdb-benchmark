@@ -75,13 +75,18 @@ class Workload {
 
   benchmark::Mutex _lock;
 
-  Workload(benchmark::WorkloadInitializationData const& data);
+  Workload(benchmark::WorkloadInitializationData const& data,
+           std::time_t minTimestamp = std::numeric_limits<std::time_t>::max(),
+           std::time_t maxTimestamp = std::numeric_limits<std::time_t>::min());
   ~Workload();
 
  public:
   bool run();
   void printHeader();
   void printResults();
+
+  std::time_t minTimestamp();
+  std::time_t maxTimestamp();
 
  protected:
   virtual std::string resultsHeader() = 0;

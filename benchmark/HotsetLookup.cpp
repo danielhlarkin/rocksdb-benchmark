@@ -19,7 +19,9 @@ std::string HotsetLookup::resultsHeader() {
       .append(" in parallel");
 }
 
-std::string HotsetLookup::operationName() { return std::string("lookup"); }
+std::string HotsetLookup::operationName() {
+  return std::string("lookupSingle");
+}
 
 void* HotsetLookup::generateWorkerInput(uint64_t i) {
   uint64_t chunkSize = (_lookupCount / _threadCount);

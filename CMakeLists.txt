@@ -32,6 +32,7 @@ add_library(RocksDBBenchmark OBJECT
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/PrimaryIndex.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/RandomLookup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/RandomNumber.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/RangeLookup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/RocksDBInstance.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/SecondaryIndex.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/StorageEngine.cpp

@@ -17,7 +17,9 @@ std::string RandomLookup::resultsHeader() {
       .append(" random documents in parallel");
 }
 
-std::string RandomLookup::operationName() { return std::string("lookup"); }
+std::string RandomLookup::operationName() {
+  return std::string("lookupSingle");
+}
 
 void* RandomLookup::generateWorkerInput(uint64_t i) {
   uint64_t chunkSize = (_lookupCount / _threadCount);

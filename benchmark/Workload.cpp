@@ -2,7 +2,8 @@
 
 using namespace benchmark;
 
-Workload::Workload(WorkloadInitializationData const& data)
+Workload::Workload(WorkloadInitializationData const& data,
+                   std::time_t minTimestamp, std::time_t maxTimestamp)
     : _db(data.db),
       _random(0xdeadbeefdeadbeefULL),
       _opDigest(10000),
@@ -19,8 +20,8 @@ Workload::Workload(WorkloadInitializationData const& data)
       _workersDone(0),
       _workersErrored(0),
       _monitorInterval(std::chrono::seconds(1)),
-      _minTimestamp(std::numeric_limits<std::time_t>::max()),
-      _maxTimestamp(std::numeric_limits<std::time_t>::min()) {}
+      _minTimestamp(minTimestamp),
+      _maxTimestamp(maxTimestamp) {}
 
 Workload::~Workload() {}
 
@@ -82,6 +83,10 @@ void Workload::printResults() {
   printUsageStatistics();
   printOpStatistics();
 }
+
+std::time_t Workload::minTimestamp() { return _minTimestamp; }
+
+std::time_t Workload::maxTimestamp() { return _maxTimestamp; }
 
 void Workload::printUsageStatistics() {
   std::string resi50 = readableSpace(_residentDigest.percentile(0.50));
