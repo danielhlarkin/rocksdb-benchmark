@@ -15,35 +15,39 @@ std::atomic<uint64_t> RocksDBInstance::_instanceCount(0);
 rocksdb::Options RocksDBInstance::generateOptions() {
   rocksdb::Options options;
 
-  /*rocksdb::BlockBasedTableOptions tableOptions;
-  tableOptions.cache_index_and_filter_blocks = true;
-  tableOptions.filter_policy.reset(rocksdb::NewBloomFilterPolicy(12, false));
-  options.table_factory.reset(rocksdb::NewBlockBasedTableFactory(tableOptions));
-*/
+  // rocksdb::BlockBasedTableOptions tableOptions;
+  // tableOptions.cache_index_and_filter_blocks = true; // DEFAULT: false
+  // tableOptions.filter_policy.reset(rocksdb::NewBloomFilterPolicy(12, false));
+  // // DEFAULT: none? or (10, true)
+  // options.table_factory.reset(rocksdb::NewBlockBasedTableFactory(tableOptions));
+
   options.comparator = _comparator;
   options.prefix_extractor.reset(new ArangoPrefixTransform());
   options.create_if_missing = true;
-  options.max_open_files = 128;
+  options.max_open_files = 128;  // DEFAULT: 16; increase for better
+                                 // performance, but keep limited to avoid
+                                 // system limits
 
-  /*options.write_buffer_size = static_cast<size_t>(0);
-  options.max_write_buffer_number = static_cast<int>(0);
-  options.delayed_write_rate = 2 * 1024 * 1024;
-  options.min_write_buffer_number_to_merge = 1;
-  options.num_levels = static_cast<int>(4);
-  options.max_bytes_for_level_base = 256 * 1024 * 1024;
-  options.max_bytes_for_level_multiplier = static_cast<int>(10);
-  options.verify_checksums_in_compaction = true;
-  options.optimize_filters_for_hits = true;
+  // options.write_buffer_size = static_cast<size_t>(0); // DEFAULT: 64MB
+  // options.max_write_buffer_number = static_cast<int>(0); // DEFAULT: 2
+  // options.delayed_write_rate = 2 * 1024 * 1024; // DEFAULT: 2MB/s
+  // options.min_write_buffer_number_to_merge = 1; // DEFAULT: 1
+  // options.num_levels = static_cast<int>(4); // DEFAULT: n/a
+  // options.max_bytes_for_level_base = 256 * 1024 * 1024; // DEFAULT: 256MB
+  // options.max_bytes_for_level_multiplier = static_cast<int>(10); // DEFAULT:
+  // 10
+  // options.verify_checksums_in_compaction = true; // DEFAULT: true
+  // options.optimize_filters_for_hits = true; // DEFAULT: false
 
-  options.base_background_compactions = static_cast<int>(1);
-  options.max_background_compactions = static_cast<int>(1);
+  // options.base_background_compactions = static_cast<int>(1); // DEFAULT: 1
+  // options.max_background_compactions = static_cast<int>(1); // DEFAULT: 1
 
-  options.max_log_file_size = static_cast<size_t>(0);
-  options.keep_log_file_num = static_cast<size_t>(1000);
-  options.log_file_time_to_roll = static_cast<size_t>(0);
-  options.compaction_readahead_size = static_cast<size_t>(0);
+  // options.max_log_file_size = static_cast<size_t>(0); // DEFAULT: n/a
+  // options.keep_log_file_num = static_cast<size_t>(1000); // DEFAULT: 1000
+  // options.log_file_time_to_roll = static_cast<size_t>(0); // DEFAULT: 0
+  // options.compaction_readahead_size = static_cast<size_t>(0); // DEFAULT: 0
 
-  if (options.base_background_compactions > 1 ||
+  /*if (options.base_background_compactions > 1 ||
       options.max_background_compactions > 1) {
     options.env->SetBackgroundThreads(
         (std::max)(options.base_background_compactions,
