@@ -1,0 +1,132 @@
+BENCHMARKING ROCKSDB WITH PARAMETERS {
+  threadCount: 8,
+  keyCount: 100000,
+  lookupCount: 500000,
+  hotsetCount: 5000,
+  rangeLimit: 20000
+  folder: /tmp/test_rocksdb-benchmark_benchmark
+}
+WORKLOAD: BATCH INSERTION
+  Insertion of 100000 documents in parallel random fashion
+  USAGE STATISTICS
+    Resident Memory: {
+      50th: 49.8MB,
+      95th: 56.9MB,
+      99th: 57.1MB
+    }
+    Virtual Memory: {
+      50th: 205.0MB,
+      95th: 205.0MB,
+      99th: 205.0MB
+    }
+    Disk Space: {
+      50th: 81.8MB,
+      95th: 86.4MB,
+      99th: 86.5MB
+    }
+  OPERATION STATISTICS
+    Total Operations: 100000
+    Total Time: 25.7s
+    Throughput: 3894.9ops/s
+    Latencies: {
+      insert: {
+        50.0th: 397.8μs,
+        75.0th: 518.4μs,
+        95.0th: 768.0μs,
+        99.0th: 1.9ms,
+        99.9th: 4.2ms
+      }
+    }
+WORKLOAD: RANDOM LOOKUP
+  Lookup of 500000 random documents in parallel
+  USAGE STATISTICS
+    Resident Memory: {
+      50th: 54.2MB,
+      95th: 56.2MB,
+      99th: 56.4MB
+    }
+    Virtual Memory: {
+      50th: 217.0MB,
+      95th: 217.0MB,
+      99th: 217.0MB
+    }
+    Disk Space: {
+      50th: 16.2MB,
+      95th: 16.2MB,
+      99th: 16.2MB
+    }
+  OPERATION STATISTICS
+    Total Operations: 500000
+    Total Time: 22.3s
+    Throughput: 22376.6ops/s
+    Latencies: {
+      lookupSingle: {
+        50.0th: 97.5μs,
+        75.0th: 118.8μs,
+        95.0th: 154.8μs,
+        99.0th: 181.2μs,
+        99.9th: 262.1μs
+      }
+    }
+WORKLOAD: HOTSET LOOKUP
+  Lookup of 500000 random documents from a hotset of size 5000 in parallel
+  USAGE STATISTICS
+    Resident Memory: {
+      50th: 53.3MB,
+      95th: 56.2MB,
+      99th: 56.3MB
+    }
+    Virtual Memory: {
+      50th: 217.0MB,
+      95th: 217.0MB,
+      99th: 217.0MB
+    }
+    Disk Space: {
+      50th: 16.2MB,
+      95th: 16.2MB,
+      99th: 16.2MB
+    }
+  OPERATION STATISTICS
+    Total Operations: 500000
+    Total Time: 22.4s
+    Throughput: 22303.0ops/s
+    Latencies: {
+      lookupSingle: {
+        50.0th: 95.0μs,
+        75.0th: 113.2μs,
+        95.0th: 155.6μs,
+        99.0th: 188.4μs,
+        99.9th: 274.4μs
+      }
+    }
+WORKLOAD: RANGE LOOKUP
+  Lookup of documents by timestamp range in parallel using a rough limit of 20000 documents per thread.
+  USAGE STATISTICS
+    Resident Memory: {
+      50th: 25.8MB,
+      95th: 25.8MB,
+      99th: 25.8MB
+    }
+    Virtual Memory: {
+      50th: 217.0MB,
+      95th: 217.0MB,
+      99th: 217.0MB
+    }
+    Disk Space: {
+      50th: 16.2MB,
+      95th: 16.2MB,
+      99th: 16.2MB
+    }
+  OPERATION STATISTICS
+    Total Operations: 19
+    Total Time: 1.8s
+    Throughput: 10.8ops/s
+    Latencies: {
+      lookupRange: {
+        50.0th: 44.6ms,
+        75.0th: 60.9ms,
+        95.0th: 961.4ms,
+        99.0th: 961.4ms,
+        99.9th: 961.4ms
+      }
+    }

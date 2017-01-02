@@ -24,7 +24,7 @@ rocksdb::Options RocksDBInstance::generateOptions() {
   options.prefix_extractor.reset(new ArangoPrefixTransform());
 
   options.create_if_missing = true;
-  options.max_open_files = -1;
+  // options.max_open_files = -1;
   options.comparator = _comparator;
 
   options.write_buffer_size = static_cast<size_t>(0);
