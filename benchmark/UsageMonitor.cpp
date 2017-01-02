@@ -79,21 +79,20 @@ uint64_t UsageMonitor::getDiskUsage() {
   // command to be executed
   std::string cmd("du -s --block-size=1024 ");
   cmd.append(_folder);
-  cmd.append(" | cut -f1 2>&1");
+  cmd.append(" | cut -f1 2>&1\0");
 
   // execute above command and get the output
-  FILE* stream = popen(cmd.c_str(), "r");
-  if (stream) {
-    const int max_size = 256;
-    char readbuf[max_size];
-    if (fgets(readbuf, max_size, stream) != NULL) {
-      return atoll(readbuf);
-    }
-    pclose(stream);
+  char buffer[128];
+  std::string result = "";
+  std::shared_ptr<FILE> pipe(popen(cmd.data(), "r"), pclose);
+  if (!pipe) throw std::runtime_error("popen() failed!");
+  while (!feof(pipe.get())) {
+    if (fgets(buffer, 128, pipe.get()) != NULL) result += buffer;
   }
 
-  return 0;
+  return atoll(result.data());
 }
+
 void UsageMonitor::monitor(std::string const& folder, uint64_t threadCount,
                            std::chrono::nanoseconds interval,
                            std::atomic<uint64_t> const* workersDone,

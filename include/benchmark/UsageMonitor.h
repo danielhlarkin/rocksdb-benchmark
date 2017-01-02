@@ -6,8 +6,11 @@
 #include <unistd.h>
 #include <atomic>
 #include <chrono>
+#include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <memory>
+#include <stdexcept>
 #include <string>
 #include <thread>
 

@@ -15,19 +15,17 @@ std::atomic<uint64_t> RocksDBInstance::_instanceCount(0);
 rocksdb::Options RocksDBInstance::generateOptions() {
   rocksdb::Options options;
 
-  rocksdb::BlockBasedTableOptions tableOptions;
+  /*rocksdb::BlockBasedTableOptions tableOptions;
   tableOptions.cache_index_and_filter_blocks = true;
   tableOptions.filter_policy.reset(rocksdb::NewBloomFilterPolicy(12, false));
   options.table_factory.reset(rocksdb::NewBlockBasedTableFactory(tableOptions));
-
+*/
   options.comparator = _comparator;
   options.prefix_extractor.reset(new ArangoPrefixTransform());
-
   options.create_if_missing = true;
-  // options.max_open_files = -1;
-  options.comparator = _comparator;
+  options.max_open_files = 128;
 
-  options.write_buffer_size = static_cast<size_t>(0);
+  /*options.write_buffer_size = static_cast<size_t>(0);
   options.max_write_buffer_number = static_cast<int>(0);
   options.delayed_write_rate = 2 * 1024 * 1024;
   options.min_write_buffer_number_to_merge = 1;
@@ -51,7 +49,7 @@ rocksdb::Options RocksDBInstance::generateOptions() {
         (std::max)(options.base_background_compactions,
                    options.max_background_compactions),
         rocksdb::Env::Priority::LOW);
-  }
+  }*/
 
   return options;
 }

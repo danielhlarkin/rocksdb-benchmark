@@ -35,9 +35,6 @@ bool SecondaryIndex::insert(std::string const& key, uint64_t revision,
           (tombstone && !isTombstoned(it))) {
         break;  // no matching entry; proceed to insert
       } else {
-        std::cout << "INSERTION OF " << key << std::endl;
-        std::cout << "  FOUND " << extractKey(it) << std::endl;
-        std::cout << "  SAME = " << sameKey(it, key) << std::endl;
         delete it;
         return false;  // matching entry; don't insert
       }
@@ -48,10 +45,6 @@ bool SecondaryIndex::insert(std::string const& key, uint64_t revision,
   std::string rocksKey = buildKey(key, revision, value);
   auto status =
       _db->Put(_writeOptions, rocksKey, tombstone ? _tombstone : _nonTombstone);
-  if (!status.ok()) {
-    std::cout << "PUT FAILED FOR " << key << std::endl;
-    std::cout << status.ToString() << std::endl;
-  }
   return status.ok();
 }
 
