@@ -71,11 +71,11 @@ std::vector<uint64_t> SecondaryIndex::lookup(VPackSlice const& start,
     if (unwrap(it) > maxRevision) {
       continue;  // revision too new, doesn't count
     }
-    while (isTombstoned(it)) {  // all previous entries with same value/key pair
-      // are invalid so we skip back until we find a
-      // different pair
-      std::string keyPrefix = buildKeyPrefix(it);
-      for (; it->Valid() && it->key().starts_with(keyPrefix); it->Prev()) {
+    while (isTombstoned(it)) {
+      // all previous entries with same value/key pair are invalid so we skip
+      // back until we find a different pair
+      std::string key = extractKey(it);
+      for (; it->Valid() && sameKey(it, key); it->Prev()) {
       }
       if (!it->Valid() || (*_cmp).Compare(it->key(), prefixSlice) < 0) {
         // this was the last valid pair; get out
@@ -144,6 +144,15 @@ SecondaryIndex::VPackSlice SecondaryIndex::extract(
   return VPackSlice(base);
 }
 
+std::string SecondaryIndex::extractKey(rocksdb::Iterator const* it) const {
+  char const* base = it->key().data() + _prefix.size();
+  VPackSlice slice(base);
+  uint64_t offset = _prefix.size() + slice.byteSize();
+
+  return std::string(it->key().data() + offset,
+                     it->key().size() - offset - sizeof(uint64_t));
+}
+
 std::time_t SecondaryIndex::timestamp(VPackSlice const& value) const {
   return value.at(0).getNumericValue<std::time_t>();
 }
@@ -163,14 +172,16 @@ SecondaryIndex::VPackSlice SecondaryIndex::extract(std::string const& s) const {
 
 bool SecondaryIndex::sameKey(rocksdb::Iterator const* it,
                              std::string const& key) const {
-  uint64_t prefixLength = _prefix.size() + 1;
+  char const* base = it->key().data() + _prefix.size();
+  VPackSlice slice(base);
+  uint64_t prefixLength = _prefix.size() + slice.byteSize();
   uint64_t suffixLength = sizeof(uint64_t);
 
   if (it->key().size() != prefixLength + key.size() + suffixLength) {
     return false;
   }
 
-  char const* base = it->key().data() + prefixLength;
+  base = it->key().data() + prefixLength;
   return (memcmp(base, key.data(), key.size()) == 0);
 }
 

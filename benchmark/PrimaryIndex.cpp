@@ -61,9 +61,11 @@ uint64_t PrimaryIndex::lookup(std::string const& key,
   auto it = _db->NewIterator(_readOptions);
   for (it->SeekForPrev(sentinel);
        it->Valid() && it->key().starts_with(keyPrefix); it->Prev()) {
-    uint64_t r = isTombstoned(it) ? 0 : unwrap(it);
-    delete it;
-    return r;
+    if (sameKey(it, key)) {
+      uint64_t r = isTombstoned(it) ? 0 : unwrap(it);
+      delete it;
+      return r;
+    }
   }
   delete it;
 

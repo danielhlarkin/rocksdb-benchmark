@@ -25,11 +25,13 @@ uint64_t Database::insert(std::string const& key, VPackSlice const& value) {
 
   bool ok = _primaryIndex.insert(key, revision, false);
   if (!ok) {
+    std::cout << "COULD NOT PUT " << key << " IN PRIMARY INDEX" << std::endl;
     return 0;  // key already exists
   }
 
   ok = _storageEngine.insert(revision, value);
   if (!ok) {
+    std::cout << "COULD NOT PUT " << key << " IN STORAGE ENGINE" << std::endl;
     _primaryIndex.remove(key, revision);
     return 0;
   }
@@ -39,6 +41,7 @@ uint64_t Database::insert(std::string const& key, VPackSlice const& value) {
       utility::generateSecondarySlice(timestamp);
   ok = _secondaryIndex.insert(key, revision, timestampSlice.slice(), false);
   if (!ok) {
+    std::cout << "COULD NOT PUT " << key << " IN SECONDARY INDEX" << std::endl;
     _primaryIndex.remove(key, revision);
     _storageEngine.remove(revision);
     return 0;

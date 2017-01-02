@@ -104,9 +104,12 @@ void UsageMonitor::monitor(std::string const& folder, uint64_t threadCount,
   UsageMonitor monitor(folder);
   while (workersDone->load() + workersErrored->load() < threadCount) {
     auto start = std::chrono::high_resolution_clock::now();
-    residentDigest->insert(monitor.getResidentUsage(), 1);
-    virtualDigest->insert(monitor.getVirtualUsage(), 1);
-    diskDigest->insert(monitor.getDiskUsage(), 1);
+    try {
+      residentDigest->insert(monitor.getResidentUsage(), 1);
+      virtualDigest->insert(monitor.getVirtualUsage(), 1);
+      diskDigest->insert(monitor.getDiskUsage(), 1);
+    } catch (...) {  // nothing to do here
+    }
     auto end = std::chrono::high_resolution_clock::now();
     std::this_thread::sleep_for(
         std::max(interval - (end - start), std::chrono::nanoseconds(0)));

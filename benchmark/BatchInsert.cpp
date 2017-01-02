@@ -72,6 +72,9 @@ void BatchInsert::insertBatch(void* input, qdigest::QDigest* opDigest,
       auto start = std::chrono::high_resolution_clock::now();
       uint64_t r = db->insert(key, document.slice());
       auto end = std::chrono::high_resolution_clock::now();
+      if (r == 0) {
+        std::cout << "FAILED TO INSERT " << key << std::endl;
+      }
       assert(r > 0);
 
       opDigest->insert((end - start).count(), 1);
