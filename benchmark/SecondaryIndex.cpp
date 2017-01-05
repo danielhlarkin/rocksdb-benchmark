@@ -1,24 +1,20 @@
 #include <benchmark/SecondaryIndex.h>
 
 using namespace benchmark;
-SecondaryIndex::SecondaryIndex(std::string const& folder,
-                               std::string const& prefix)
+SecondaryIndex::SecondaryIndex(std::string const& folder, uint64_t databaseId,
+                               uint64_t collectionId, uint64_t indexId)
     : _instance(folder),
       _db(_instance.db()),
       _cmp(_instance.comparator()),
-      _prefix(prefix),
+      _prefix(buildPrefix(
+          _instance.getIndexSlug(databaseId, collectionId, indexId))),
       _tombstone("1"),
       _nonTombstone("\0") {}
 
 SecondaryIndex::~SecondaryIndex() {}
 
-std::string SecondaryIndex::buildPrefix(uint64_t databaseId,
-                                        uint64_t collectionId,
-                                        uint64_t indexId) {
-  return std::string("i")
-      .append(utility::intToString(databaseId))
-      .append(utility::intToString(collectionId))
-      .append(utility::intToString(indexId));
+std::string SecondaryIndex::buildPrefix(uint32_t slug) {
+  return std::string("i").append(utility::shortToString(slug));
 }
 
 bool SecondaryIndex::insert(std::string const& key, uint64_t revision,

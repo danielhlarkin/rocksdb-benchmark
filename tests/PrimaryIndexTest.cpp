@@ -13,8 +13,7 @@ typedef arangodb::velocypack::SliceContainer VPackSliceContainer;
 
 int main(int, char**) {
   std::string folder("/tmp/test_rocksdb-benchmark_primary-index");
-  std::string prefix = PrimaryIndex::buildPrefix(0x0ULL, 0x1ULL, 0x2ULL);
-  PrimaryIndex index(folder, prefix);
+  PrimaryIndex index(folder, 0x0ULL, 0x1ULL, 0x2ULL);
   HybridLogicalClock clock;
 
   int count = 100;

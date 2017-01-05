@@ -10,6 +10,7 @@ static int remove_directory(const char* path);
 Mutex RocksDBInstance::_rocksDbMutex;
 ArangoComparator* RocksDBInstance::_comparator;
 rocksdb::DB* RocksDBInstance::_db = nullptr;
+uint32_t RocksDBInstance::_maxSlug = 0;
 std::atomic<uint64_t> RocksDBInstance::_instanceCount(0);
 
 rocksdb::Options RocksDBInstance::generateOptions() {
@@ -59,7 +60,9 @@ rocksdb::Options RocksDBInstance::generateOptions() {
 }
 
 RocksDBInstance::RocksDBInstance(std::string const& folder)
-    : _dbFolder(folder) {
+    : _dbFolder(folder),
+      _readOptions(rocksdb::ReadOptions()),
+      _writeOptions(rocksdb::WriteOptions()) {
   MUTEX_LOCKER(locker, _rocksDbMutex);
   if (_db == nullptr) {
     _comparator = new ArangoComparator();
@@ -69,6 +72,7 @@ RocksDBInstance::RocksDBInstance(std::string const& folder)
       std::cerr << status.ToString() << std::endl;
     }
     assert(status.ok());
+    getMaxSlug();
   }
   _instanceCount++;
 }
@@ -87,6 +91,60 @@ RocksDBInstance::~RocksDBInstance() {
 
 rocksdb::DB* RocksDBInstance::db() { return _db; }
 ArangoComparator* RocksDBInstance::comparator() { return _comparator; }
+
+uint32_t RocksDBInstance::getDocumentSlug(uint64_t databaseId,
+                                          uint64_t collectionId) {
+  std::string slugKey = std::string("S")
+                            .append(utility::intToString(databaseId))
+                            .append(utility::intToString(collectionId));
+  std::string slugSlice;
+
+  auto status = _db->Get(_readOptions, slugKey, &slugSlice);
+  if (status.ok()) {
+    return *reinterpret_cast<uint32_t const*>(slugSlice.data());
+  }
+
+  MUTEX_LOCKER(lock, _rocksDbMutex);
+  slugSlice = utility::shortToString(++_maxSlug);
+  status = _db->Put(_writeOptions, slugKey, slugSlice);
+  if (!status.ok()) {
+    return 0;
+  }
+  return _maxSlug;
+}
+
+uint32_t RocksDBInstance::getIndexSlug(uint64_t databaseId,
+                                       uint64_t collectionId,
+                                       uint64_t indexId) {
+  std::string slugKey = std::string("S")
+                            .append(utility::intToString(databaseId))
+                            .append(utility::intToString(collectionId))
+                            .append(utility::intToString(indexId));
+  std::string slugSlice;
+
+  auto status = _db->Get(_readOptions, slugKey, &slugSlice);
+  if (status.ok()) {
+    return *reinterpret_cast<uint32_t const*>(slugSlice.data());
+  }
+
+  MUTEX_LOCKER(lock, _rocksDbMutex);
+  slugSlice = utility::shortToString(++_maxSlug);
+  status = _db->Put(_writeOptions, slugKey, slugSlice);
+  if (!status.ok()) {
+    return 0;
+  }
+  return _maxSlug;
+}
+
+void RocksDBInstance::getMaxSlug() {
+  auto it = _db->NewIterator(_readOptions);
+  for (it->Seek("S"); it->Valid() && it->key().starts_with("S"); it->Next()) {
+    uint32_t current = utility::stringToShort(it->value().data());
+    if (current > _maxSlug) {
+      _maxSlug = current;
+    }
+  }
+}
 
 static int remove_directory(const char* path) {
   DIR* d = opendir(path);

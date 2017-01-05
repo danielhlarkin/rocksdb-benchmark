@@ -8,13 +8,9 @@ Database::Database(std::string const& folder)
       _collectionId(_random.next()),
       _primaryIndexId(_random.next()),
       _secondaryIndexId(_random.next()),
-      _storageEngine(_folder,
-                     StorageEngine::buildPrefix(_databaseId, _collectionId)),
-      _primaryIndex(_folder, PrimaryIndex::buildPrefix(
-                                 _databaseId, _collectionId, _primaryIndexId)),
-      _secondaryIndex(_folder,
-                      SecondaryIndex::buildPrefix(_databaseId, _collectionId,
-                                                  _secondaryIndexId)) {}
+      _storageEngine(_folder, _databaseId, _collectionId),
+      _primaryIndex(_folder, _databaseId, _collectionId, _primaryIndexId),
+      _secondaryIndex(_folder, _databaseId, _collectionId, _secondaryIndexId) {}
 
 Database::~Database() {}
 
@@ -76,6 +72,7 @@ bool Database::remove(std::string const& key) {
 
 Database::VPackSliceContainer Database::lookupSingle(
     std::string const& key, uint64_t maxRevision) const {
+  // std::cout << "LOOKING UP " << key << " IN DATABASE" << std::endl;
   uint64_t r = _primaryIndex.lookup(key, maxRevision);
   return (r == 0) ? VPackSliceContainer(VPackSlice())
                   : _storageEngine.lookup(r);

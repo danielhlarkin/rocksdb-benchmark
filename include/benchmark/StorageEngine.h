@@ -18,10 +18,11 @@ class StorageEngine {
   rocksdb::WriteOptions _writeOptions;
 
  public:
-  StorageEngine(std::string const& folder, std::string const& prefix);
+  StorageEngine(std::string const& folder, uint64_t databaseId,
+                uint64_t collectionId);
   ~StorageEngine();
 
-  static std::string buildPrefix(uint64_t databaseId, uint64_t collectionId);
+  static std::string buildPrefix(uint32_t slug);
 
   bool insert(uint64_t revision, VPackSlice const& value);
   bool remove(uint64_t revision);

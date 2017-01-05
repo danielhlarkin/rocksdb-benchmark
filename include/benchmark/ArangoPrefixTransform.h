@@ -10,8 +10,7 @@ namespace benchmark {
 class ArangoPrefixTransform final : public rocksdb::SliceTransform {
  private:
   const std::string _name;
-  const uint64_t _dLength;
-  const uint64_t _iLength;
+  const uint64_t _sluggedLength;
 
  public:
   ArangoPrefixTransform();

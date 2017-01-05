@@ -1,17 +1,17 @@
 #include <benchmark/StorageEngine.h>
 
 using namespace benchmark;
-StorageEngine::StorageEngine(std::string const& folder,
-                             std::string const& prefix)
-    : _instance(folder), _db(_instance.db()), _prefix(prefix) {}
+StorageEngine::StorageEngine(std::string const& folder, uint64_t databaseId,
+                             uint64_t collectionId)
+    : _instance(folder),
+      _db(_instance.db()),
+      _prefix(
+          buildPrefix(_instance.getDocumentSlug(databaseId, collectionId))) {}
 
 StorageEngine::~StorageEngine() {}
 
-std::string StorageEngine::buildPrefix(uint64_t databaseId,
-                                       uint64_t collectionId) {
-  return std::string("d")
-      .append(utility::intToString(databaseId))
-      .append(utility::intToString(collectionId));
+std::string StorageEngine::buildPrefix(uint32_t slug) {
+  return std::string("d").append(utility::shortToString(slug));
 }
 
 bool StorageEngine::insert(uint64_t revision, VPackSlice const& value) {

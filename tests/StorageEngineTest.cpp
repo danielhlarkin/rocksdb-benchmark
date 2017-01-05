@@ -13,8 +13,7 @@ typedef arangodb::velocypack::SliceContainer VPackSliceContainer;
 
 int main(int, char**) {
   std::string folder("/tmp/test_rocksdb-benchmark_storage-engine");
-  std::string prefix = StorageEngine::buildPrefix(0x0ULL, 0x1ULL);
-  StorageEngine engine(folder, prefix);
+  StorageEngine engine(folder, 0x0ULL, 0x1ULL);
   HybridLogicalClock clock;
 
   int count = 100;

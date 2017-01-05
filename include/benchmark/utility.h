@@ -9,7 +9,9 @@
 
 namespace benchmark {
 namespace utility {
+std::string shortToString(uint32_t n);
 std::string intToString(uint64_t n);
+uint32_t stringToShort(char const* c);
 uint64_t stringToInt(char const* c);
 arangodb::velocypack::SliceContainer generateDocument(std::string const& key);
 arangodb::velocypack::SliceContainer generateDocument(std::string const& key,
@@ -19,6 +21,8 @@ arangodb::velocypack::SliceContainer generateSecondarySlice(
     std::time_t timestamp);
 arangodb::velocypack::SliceContainer generateNextSecondarySlice(
     arangodb::velocypack::Slice const& value);
+
+std::string hexDump(std::string const& input);
 }
 }
 

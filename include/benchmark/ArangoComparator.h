@@ -14,8 +14,7 @@ class ArangoComparator final : public rocksdb::Comparator {
   typedef arangodb::velocypack::Slice VPackSlice;
 
   const std::string _name;
-  const uint64_t _dLength;
-  const uint64_t _iLength;
+  const uint64_t _sluggedLength;
 
  public:
   ArangoComparator();
@@ -35,6 +34,8 @@ class ArangoComparator final : public rocksdb::Comparator {
                              rocksdb::Slice const& rhs) const;
   int compareIndexEntries(rocksdb::Slice const& lhs,
                           rocksdb::Slice const& rhs) const;
+  int compareSlugEntries(rocksdb::Slice const& lhs,
+                         rocksdb::Slice const& rhs) const;
   int compareSlices(VPackSlice const& lhs, VPackSlice const& rhs) const;
   VPackSlice extractKeySlice(rocksdb::Slice const& slice) const;
 };

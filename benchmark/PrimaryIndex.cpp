@@ -3,21 +3,19 @@
 #include <thread>
 
 using namespace benchmark;
-PrimaryIndex::PrimaryIndex(std::string const& folder, std::string const& prefix)
+PrimaryIndex::PrimaryIndex(std::string const& folder, uint64_t databaseId,
+                           uint64_t collectionId, uint64_t indexId)
     : _instance(folder),
       _db(_instance.db()),
-      _prefix(prefix),
+      _prefix(buildPrefix(
+          _instance.getIndexSlug(databaseId, collectionId, indexId))),
       _tombstone("1"),
       _nonTombstone("\0") {}
 
 PrimaryIndex::~PrimaryIndex() {}
 
-std::string PrimaryIndex::buildPrefix(uint64_t databaseId,
-                                      uint64_t collectionId, uint64_t indexId) {
-  return std::string("i")
-      .append(utility::intToString(databaseId))
-      .append(utility::intToString(collectionId))
-      .append(utility::intToString(indexId));
+std::string PrimaryIndex::buildPrefix(uint32_t slug) {
+  return std::string("i").append(utility::shortToString(slug));
 }
 
 bool PrimaryIndex::insert(std::string const& key, uint64_t revision,

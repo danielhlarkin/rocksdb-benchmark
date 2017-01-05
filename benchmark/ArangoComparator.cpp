@@ -4,9 +4,7 @@ using namespace benchmark;
 using namespace arangodb::velocypack;
 
 ArangoComparator::ArangoComparator()
-    : _name("ArangoDB Comparator"),
-      _dLength(1 + (2 * sizeof(uint64_t))),
-      _iLength(1 + (3 * sizeof(uint64_t))) {}
+    : _name("ArangoDB Comparator"), _sluggedLength(1 + sizeof(uint32_t)) {}
 
 ArangoComparator::~ArangoComparator() {}
 
@@ -25,9 +23,12 @@ int ArangoComparator::Compare(rocksdb::Slice const& lhs,
       return compareDocumentEntries(lhs, rhs);
     }
     case 'i': {
-      result = compareIndexEntries(lhs, rhs);
-      return result;
+      return compareIndexEntries(lhs, rhs);
     }
+    case 'S': {
+      return compareSlugEntries(lhs, rhs);
+    }
+    default: { return 0; }
   }
 }
 
@@ -50,36 +51,39 @@ int ArangoComparator::comparePrefixes(rocksdb::Slice const& lhs,
 
   char type = lhs[0];
   switch (type) {
-    case 'd': {
-      return memcmp(lhs.data(), rhs.data(), _dLength);
-    }
+    case 'd':
     case 'i': {
-      return memcmp(lhs.data(), rhs.data(), _iLength);
+      return memcmp(lhs.data(), rhs.data(), _sluggedLength);
     }
+    case 'S':
     default: { return 0; }
   }
 }
 
 int ArangoComparator::compareDocumentEntries(rocksdb::Slice const& lhs,
                                              rocksdb::Slice const& rhs) const {
-  uint64_t offset = _dLength;
+  uint64_t offset = _sluggedLength;
   if (lhs.size() == offset) {
     return 0;  // comparing two prefixes, all done
   }
 
-  uint64_t lRev = utility::stringToInt(lhs.data() + offset);
-  uint64_t rRev = utility::stringToInt(rhs.data() + offset);
+  return memcmp(lhs.data() + offset, rhs.data() + offset, sizeof(uint64_t));
+}
 
-  if (lRev == rRev) {
-    return 0;
+int ArangoComparator::compareSlugEntries(rocksdb::Slice const& lhs,
+                                         rocksdb::Slice const& rhs) const {
+  uint64_t minLength = (lhs.size() <= rhs.size()) ? lhs.size() : rhs.size();
+  int result = memcmp(lhs.data(), rhs.data(), minLength);
+  if (result != 0) {
+    return result;
   }
 
-  return (lRev < rRev) ? -1 : 1;
+  return (int)((int64_t)lhs.size() - (int64_t)rhs.size());
 }
 
 int ArangoComparator::compareIndexEntries(rocksdb::Slice const& lhs,
                                           rocksdb::Slice const& rhs) const {
-  uint64_t offset = _iLength;
+  uint64_t offset = _sluggedLength;
   if (lhs.size() == offset) {
     return 0;  // comparing two prefixes, all done
   }

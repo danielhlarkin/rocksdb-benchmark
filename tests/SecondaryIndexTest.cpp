@@ -14,8 +14,7 @@ typedef arangodb::velocypack::SliceContainer VPackSliceContainer;
 
 int main(int, char**) {
   std::string folder("/tmp/test_rocksdb-benchmark_secondary-index");
-  std::string prefix = SecondaryIndex::buildPrefix(0x0ULL, 0x1ULL, 0x2ULL);
-  SecondaryIndex index(folder, prefix);
+  SecondaryIndex index(folder, 0x0ULL, 0x1ULL, 0x2ULL);
   HybridLogicalClock clock;
   std::chrono::system_clock systemClock;
   auto start = std::chrono::system_clock::to_time_t(systemClock.now());

@@ -25,11 +25,11 @@ class SecondaryIndex {
   std::string _nonTombstone;
 
  public:
-  SecondaryIndex(std::string const& folder, std::string const& prefix);
+  SecondaryIndex(std::string const& folder, uint64_t databaseId,
+                 uint64_t collectionId, uint64_t indexId);
   ~SecondaryIndex();
 
-  static std::string buildPrefix(uint64_t databaseId, uint64_t collectionId,
-                                 uint64_t indexId);
+  static std::string buildPrefix(uint32_t slug);
 
   bool insert(std::string const& key, uint64_t revision,
               VPackSlice const& value, bool tombstone);

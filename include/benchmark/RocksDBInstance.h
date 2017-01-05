@@ -11,6 +11,7 @@
 #include <rocksdb/options.h>
 #include <rocksdb/slice_transform.h>
 #include <rocksdb/table.h>
+#include <stdint.h>
 #include <cassert>
 #include <iostream>
 #include <string>
@@ -22,8 +23,11 @@ class RocksDBInstance {
   static benchmark::Mutex _rocksDbMutex;
   static ArangoComparator* _comparator;
   static rocksdb::DB* _db;                      // single global instance
+  static uint32_t _maxSlug;                     // maximum slug granted
   static std::atomic<uint64_t> _instanceCount;  // number of active maps
   std::string _dbFolder;
+  rocksdb::ReadOptions _readOptions;
+  rocksdb::WriteOptions _writeOptions;
 
  public:
   RocksDBInstance(std::string const& folder);
@@ -32,8 +36,13 @@ class RocksDBInstance {
   rocksdb::DB* db();
   ArangoComparator* comparator();
 
+  uint32_t getDocumentSlug(uint64_t databaseId, uint64_t collectionId);
+  uint32_t getIndexSlug(uint64_t databaseId, uint64_t collectionId,
+                        uint64_t indexId);
+
  private:
   rocksdb::Options generateOptions();
+  void getMaxSlug();
 };
 }  // namespace benchmark
 
