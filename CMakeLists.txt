@@ -10,8 +10,8 @@ find_package(Threads REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(BZip2 REQUIRED)
 
-#list(APPEND CMAKE_CXX_FLAGS "-fprofile-arcs -ftest-coverage -DNDEBUG ${CMAKE_CXX_FLAGS}")
-#list(APPEND CMAKE_EXE_LINKER_FLAGS "-O0 -g -fprofile-arcs -ftest-coverage -DNDEBUG ${CMAKE_EXE_LINKER_FLAGS}")
+set(CMAKE_CXX_FLAGS "-O3 -fpeel-loops -g -DNDEBUG ${CMAKE_CXX_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "-O3 -fpeel-loops -g -DNDEBUG ${CMAKE_EXE_LINKER_FLAGS}")
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty
