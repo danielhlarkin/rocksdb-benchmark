@@ -30,7 +30,7 @@ uint64_t Database::insert(std::string const& key, VPackSlice const& value) {
     return 0;
   }
 
-  /*std::time_t timestamp = value.get("timestamp").getNumber<std::time_t>();
+  std::time_t timestamp = value.get("timestamp").getNumber<std::time_t>();
   VPackSliceContainer timestampSlice =
       utility::generateSecondarySlice(timestamp);
   ok = _secondaryIndex.insert(key, revision, timestampSlice.slice(), false);
@@ -38,13 +38,6 @@ uint64_t Database::insert(std::string const& key, VPackSlice const& value) {
     _primaryIndex.remove(key, revision);
     _storageEngine.remove(revision);
     return 0;
-}*/
-
-  ok = _secondaryIndex.insert(key, revision, false);
-  if (!ok) {
-    _primaryIndex.remove(key, revision);
-    _storageEngine.remove(revision);
-    return 0;  // key already exists
   }
 
   return revision;
@@ -61,11 +54,7 @@ bool Database::remove(std::string const& key) {
       return false;
     }
 
-    ok = _secondaryIndex.insert(key, revision, true);
-    if (!ok) {
-      return false;
-    }
-    /*std::time_t timestamp =
+    std::time_t timestamp =
         value.slice().get("timestamp").getNumber<std::time_t>();
     VPackSliceContainer timestampSlice =
         utility::generateSecondarySlice(timestamp);
@@ -73,7 +62,7 @@ bool Database::remove(std::string const& key) {
     if (!ok) {
       _primaryIndex.remove(key, revision);
       return false;
-  }*/
+    }
 
     return true;
   }
@@ -93,11 +82,11 @@ std::vector<Database::VPackSliceContainer> Database::lookupRange(
     uint64_t maxRevision) const {
   std::vector<VPackSliceContainer> documents;
 
-  /*std::vector<uint64_t> revisions =
+  std::vector<uint64_t> revisions =
       _secondaryIndex.lookup(start, end, maxRevision);
   for (int i = 0; i < revisions.size(); i++) {
     documents.emplace_back(_storageEngine.lookup(revisions[i]));
-}*/
+  }
 
   return documents;
 }

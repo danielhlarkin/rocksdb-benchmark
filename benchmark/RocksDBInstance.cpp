@@ -22,7 +22,7 @@ rocksdb::Options RocksDBInstance::generateOptions() {
   // // DEFAULT: none? or (10, true)
   // options.table_factory.reset(rocksdb::NewBlockBasedTableFactory(tableOptions));
 
-  // options.comparator = _comparator;
+  options.comparator = _comparator;
   options.prefix_extractor.reset(new ArangoPrefixTransform());
   options.create_if_missing = true;
   options.max_open_files = 128;  // DEFAULT: 16; increase for better
