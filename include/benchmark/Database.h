@@ -26,7 +26,7 @@ class Database {
   uint64_t _secondaryIndexId;
   benchmark::StorageEngine _storageEngine;
   benchmark::PrimaryIndex _primaryIndex;
-  benchmark::SecondaryIndex _secondaryIndex;
+  benchmark::PrimaryIndex _secondaryIndex;
 
  public:
   Database(std::string const& folder);
