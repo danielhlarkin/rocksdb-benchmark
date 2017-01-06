@@ -10,62 +10,62 @@ WORKLOAD: BATCH INSERTION
   Insertion of 100000 documents in parallel random fashion
   USAGE STATISTICS
     Resident Memory: {
-      50th: 17.8MB,
-      95th: 32.3MB,
-      99th: 33.9MB
+      50th: 29.0MB,
+      95th: 37.0MB,
+      99th: 37.0MB
     }
     Virtual Memory: {
-      50th: 73.0MB,
-      95th: 89.0MB,
-      99th: 89.0MB
+      50th: 76.6MB,
+      95th: 84.6MB,
+      99th: 84.6MB
     }
     Disk Space: {
-      50th: 70.6MB,
-      95th: 70.6MB,
-      99th: 70.6MB
+      50th: 77.0MB,
+      95th: 77.0MB,
+      99th: 77.0MB
     }
   OPERATION STATISTICS
     Total Operations: 100000
-    Total Time: 35.0s
-    Throughput: 2859.3ops/s
+    Total Time: 6.4s
+    Throughput: 15528.5ops/s
     Latencies: {
       insert: {
-        50.0th: 127.5μs,
-        75.0th: 150.5μs,
-        95.0th: 194.9μs,
-        99.0th: 303.1μs,
-        99.9th: 1.6ms
+        50.0th: 56.5μs,
+        75.0th: 60.3μs,
+        95.0th: 70.1μs,
+        99.0th: 94.2μs,
+        99.9th: 524.3μs
       }
     }
 WORKLOAD: RANDOM LOOKUP
   Lookup of 500000 random documents in parallel
   USAGE STATISTICS
     Resident Memory: {
-      50th: 38.8MB,
-      95th: 38.8MB,
-      99th: 38.8MB
+      50th: 40.1MB,
+      95th: 40.3MB,
+      99th: 40.3MB
     }
     Virtual Memory: {
-      50th: 93.0MB,
-      95th: 93.0MB,
-      99th: 93.0MB
+      50th: 92.6MB,
+      95th: 92.6MB,
+      99th: 92.6MB
     }
     Disk Space: {
-      50th: 70.6MB,
-      95th: 70.6MB,
-      99th: 70.6MB
+      50th: 77.0MB,
+      95th: 77.0MB,
+      99th: 77.0MB
     }
   OPERATION STATISTICS
     Total Operations: 500000
-    Total Time: 14.7s
-    Throughput: 33914.5ops/s
+    Total Time: 6.5s
+    Throughput: 77422.7ops/s
     Latencies: {
       lookupSingle: {
-        50.0th: 26.0μs,
-        75.0th: 30.9μs,
-        95.0th: 41.9μs,
-        99.0th: 54.8μs,
-        99.9th: 81.9μs
+        50.0th: 12.1μs,
+        75.0th: 13.1μs,
+        95.0th: 14.7μs,
+        99.0th: 16.0μs,
+        99.9th: 19.3μs
       }
     }
 WORKLOAD: HOTSET LOOKUP
@@ -73,30 +73,30 @@ WORKLOAD: HOTSET LOOKUP
   USAGE STATISTICS
     Resident Memory: {
       50th: 39.3MB,
-      95th: 39.3MB,
-      99th: 39.3MB
+      95th: 39.4MB,
+      99th: 39.4MB
     }
     Virtual Memory: {
-      50th: 97.0MB,
-      95th: 97.0MB,
-      99th: 97.0MB
+      50th: 92.6MB,
+      95th: 92.6MB,
+      99th: 92.6MB
     }
     Disk Space: {
-      50th: 70.6MB,
-      95th: 70.6MB,
-      99th: 70.6MB
+      50th: 77.0MB,
+      95th: 77.0MB,
+      99th: 77.0MB
     }
   OPERATION STATISTICS
     Total Operations: 500000
-    Total Time: 14.7s
-    Throughput: 34060.0ops/s
+    Total Time: 6.2s
+    Throughput: 80132.1ops/s
     Latencies: {
       lookupSingle: {
-        50.0th: 25.5μs,
-        75.0th: 31.0μs,
-        95.0th: 42.1μs,
-        99.0th: 54.6μs,
-        99.9th: 90.1μs
+        50.0th: 11.7μs,
+        75.0th: 12.5μs,
+        95.0th: 13.8μs,
+        99.0th: 15.2μs,
+        99.9th: 18.5μs
       }
     }
 WORKLOAD: RANGE LOOKUP
@@ -118,15 +118,15 @@ WORKLOAD: RANGE LOOKUP
       99th: 0.0KB
     }
   OPERATION STATISTICS
-    Total Operations: 35
-    Total Time: 718.8ms
-    Throughput: 48.7ops/s
+    Total Operations: 6
+    Total Time: 134.4ms
+    Throughput: 44.7ops/s
     Latencies: {
       lookupRange: {
-        50.0th: 7.6ms,
-        75.0th: 8.2ms,
-        95.0th: 131.6ms,
-        99.0th: 148.3ms,
-        99.9th: 148.3ms
+        50.0th: 48.8ms,
+        75.0th: 48.8ms,
+        95.0th: 48.8ms,
+        99.0th: 48.8ms,
+        99.9th: 48.8ms
       }
     }

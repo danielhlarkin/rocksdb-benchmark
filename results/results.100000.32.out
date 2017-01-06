@@ -10,14 +10,14 @@ WORKLOAD: BATCH INSERTION
   Insertion of 100000 documents in parallel random fashion
   USAGE STATISTICS
     Resident Memory: {
-      50th: 48.8MB,
-      95th: 73.0MB,
-      99th: 73.0MB
+      50th: 25.0MB,
+      95th: 25.0MB,
+      99th: 25.0MB
     }
     Virtual Memory: {
-      50th: 461.1MB,
-      95th: 469.1MB,
-      99th: 469.1MB
+      50th: 116.6MB,
+      95th: 116.6MB,
+      99th: 116.6MB
     }
     Disk Space: {
       50th: 70.6MB,
@@ -26,15 +26,15 @@ WORKLOAD: BATCH INSERTION
     }
   OPERATION STATISTICS
     Total Operations: 100000
-    Total Time: 3.2s
-    Throughput: 31399.2ops/s
+    Total Time: 1.8s
+    Throughput: 54981.4ops/s
     Latencies: {
       insert: {
-        50.0th: 458.0μs,
-        75.0th: 539.6μs,
-        95.0th: 764.9μs,
+        50.0th: 468.9μs,
+        75.0th: 554.2μs,
+        95.0th: 764.4μs,
         99.0th: 1.1ms,
-        99.9th: 4.7ms
+        99.9th: 2.6ms
       }
     }
 WORKLOAD: RANDOM LOOKUP
@@ -57,15 +57,15 @@ WORKLOAD: RANDOM LOOKUP
     }
   OPERATION STATISTICS
     Total Operations: 500000
-    Total Time: 939.4ms
-    Throughput: 532250.9ops/s
+    Total Time: 411.1ms
+    Throughput: 1216290.1ops/s
     Latencies: {
       lookupSingle: {
-        50.0th: 49.9μs,
-        75.0th: 58.8μs,
-        95.0th: 74.1μs,
-        99.0th: 90.1μs,
-        99.9th: 124.9μs
+        50.0th: 18.3μs,
+        75.0th: 20.2μs,
+        95.0th: 23.2μs,
+        99.0th: 26.1μs,
+        99.9th: 34.5μs
       }
     }
 WORKLOAD: HOTSET LOOKUP
@@ -88,45 +88,45 @@ WORKLOAD: HOTSET LOOKUP
     }
   OPERATION STATISTICS
     Total Operations: 500000
-    Total Time: 927.1ms
-    Throughput: 539333.9ops/s
+    Total Time: 411.9ms
+    Throughput: 1214016.4ops/s
     Latencies: {
       lookupSingle: {
-        50.0th: 51.7μs,
-        75.0th: 59.5μs,
-        95.0th: 71.1μs,
-        99.0th: 81.9μs,
-        99.9th: 147.5μs
+        50.0th: 18.7μs,
+        75.0th: 20.5μs,
+        95.0th: 23.4μs,
+        99.0th: 26.2μs,
+        99.9th: 35.1μs
       }
     }
 WORKLOAD: RANGE LOOKUP
   Lookup of documents by timestamp range in parallel using a rough limit of 20000 documents per thread.
   USAGE STATISTICS
     Resident Memory: {
-      50th: 37.9MB,
-      95th: 37.9MB,
-      99th: 37.9MB
+      50th: 0.0KB,
+      95th: 0.0KB,
+      99th: 0.0KB
     }
     Virtual Memory: {
-      50th: 305.0MB,
-      95th: 305.0MB,
-      99th: 305.0MB
+      50th: 0.0KB,
+      95th: 0.0KB,
+      99th: 0.0KB
     }
     Disk Space: {
-      50th: 70.6MB,
-      95th: 70.6MB,
-      99th: 70.6MB
+      50th: 0.0KB,
+      95th: 0.0KB,
+      99th: 0.0KB
     }
   OPERATION STATISTICS
-    Total Operations: 34
-    Total Time: 1.2s
-    Throughput: 28.9ops/s
+    Total Operations: 33
+    Total Time: 459.1ms
+    Throughput: 71.9ops/s
     Latencies: {
       lookupRange: {
-        50.0th: 1.2s,
-        75.0th: 1.2s,
-        95.0th: 1.2s,
-        99.0th: 1.2s,
-        99.9th: 1.2s
+        50.0th: 456.7ms,
+        75.0th: 460.3ms,
+        95.0th: 463.0ms,
+        99.0th: 466.0ms,
+        99.9th: 466.0ms
       }
     }
