@@ -12,25 +12,24 @@ class PrimaryIndex {
   typedef arangodb::velocypack::Slice VPackSlice;
   typedef arangodb::velocypack::SliceContainer VPackSliceContainer;
 
-  benchmark::RocksDBInstance _instance;
-  rocksdb::DB* _db;
   std::string _prefix;
   rocksdb::ReadOptions _readOptions;
-  rocksdb::WriteOptions _writeOptions;
 
   std::string _tombstone;
   std::string _nonTombstone;
 
  public:
-  PrimaryIndex(std::string const& folder, uint64_t databaseId,
-               uint64_t collectionId, uint64_t indexId);
+  PrimaryIndex(uint32_t slug);
   ~PrimaryIndex();
 
   static std::string buildPrefix(uint32_t slug);
 
-  bool insert(std::string const& key, uint64_t revision, bool tombstone);
-  bool remove(std::string const& key, uint64_t revision);
-  uint64_t lookup(std::string const& key, uint64_t maxRevision) const;
+  bool insert(rocksdb::Transaction* tx, std::string const& key,
+              uint64_t revision, bool tombstone);
+  bool remove(rocksdb::Transaction* tx, std::string const& key,
+              uint64_t revision);
+  uint64_t lookup(rocksdb::Transaction* tx, std::string const& key,
+                  uint64_t maxRevision) const;
 
  private:
   std::string buildKey(std::string const& key, uint64_t revision) const;

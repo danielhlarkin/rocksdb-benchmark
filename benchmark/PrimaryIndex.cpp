@@ -3,12 +3,9 @@
 #include <thread>
 
 using namespace benchmark;
-PrimaryIndex::PrimaryIndex(std::string const& folder, uint64_t databaseId,
-                           uint64_t collectionId, uint64_t indexId)
-    : _instance(folder),
-      _db(_instance.db()),
-      _prefix(buildPrefix(
-          _instance.getIndexSlug(databaseId, collectionId, indexId))),
+PrimaryIndex::PrimaryIndex(uint32_t slug)
+    : _prefix(buildPrefix(slug)),
+      _readOptions(rocksdb::ReadOptions()),
       _tombstone("1"),
       _nonTombstone("\0") {}
 
@@ -18,13 +15,13 @@ std::string PrimaryIndex::buildPrefix(uint32_t slug) {
   return std::string("i").append(utility::shortToString(slug));
 }
 
-bool PrimaryIndex::insert(std::string const& key, uint64_t revision,
-                          bool tombstone) {
+bool PrimaryIndex::insert(rocksdb::Transaction* tx, std::string const& key,
+                          uint64_t revision, bool tombstone) {
   // uniqueness/validity check
   // seek to maxRevision and work backwards checking tombstone
   std::string keyPrefix = buildKeyPrefix(key);
   std::string sentinel = buildKeySentinel(key);
-  auto it = _db->NewIterator(_readOptions);
+  auto it = tx->GetIterator(_readOptions);
   for (it->SeekForPrev(sentinel);
        it->Valid() && it->key().starts_with(keyPrefix); it->Prev()) {
     if (sameKey(it, key)) {
@@ -40,23 +37,23 @@ bool PrimaryIndex::insert(std::string const& key, uint64_t revision,
   delete it;
 
   std::string rocksKey = buildKey(key, revision);
-  auto status =
-      _db->Put(_writeOptions, rocksKey, tombstone ? _tombstone : _nonTombstone);
+  auto status = tx->Put(rocksKey, tombstone ? _tombstone : _nonTombstone);
   return status.ok();
 }
 
-bool PrimaryIndex::remove(std::string const& key, uint64_t revision) {
+bool PrimaryIndex::remove(rocksdb::Transaction* tx, std::string const& key,
+                          uint64_t revision) {
   std::string rocksKey = buildKey(key, revision);
-  auto status = _db->Delete(_writeOptions, rocksKey);
+  auto status = tx->Delete(rocksKey);
   return status.ok();
 }
 
-uint64_t PrimaryIndex::lookup(std::string const& key,
+uint64_t PrimaryIndex::lookup(rocksdb::Transaction* tx, std::string const& key,
                               uint64_t maxRevision) const {
   // seek to maxRevision and work backwards checking tombstone
   std::string keyPrefix = buildKeyPrefix(key);
   std::string sentinel = buildKeySentinel(key, maxRevision);
-  auto it = _db->NewIterator(_readOptions);
+  auto it = tx->GetIterator(_readOptions);
   for (it->SeekForPrev(sentinel);
        it->Valid() && it->key().starts_with(keyPrefix); it->Prev()) {
     if (sameKey(it, key)) {

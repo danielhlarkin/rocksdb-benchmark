@@ -78,6 +78,12 @@ add_executable(DatabaseTest
 )
 target_link_libraries(DatabaseTest PRIVATE ${LIBRARY_LIST})
 
+add_executable(TransactionTest
+  $<TARGET_OBJECTS:RocksDBBenchmark>
+  tests/TransactionTest.cpp
+)
+target_link_libraries(TransactionTest PRIVATE ${LIBRARY_LIST})
+
 add_executable(rocksdb-benchmark
   $<TARGET_OBJECTS:RocksDBBenchmark>
   benchmark/rocksdb-benchmark.cpp

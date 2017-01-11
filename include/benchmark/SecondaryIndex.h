@@ -14,28 +14,25 @@ class SecondaryIndex {
   typedef arangodb::velocypack::Slice VPackSlice;
   typedef arangodb::velocypack::SliceContainer VPackSliceContainer;
 
-  benchmark::RocksDBInstance _instance;
-  rocksdb::DB* _db;
   ArangoComparator* _cmp;
   std::string _prefix;
   rocksdb::ReadOptions _readOptions;
-  rocksdb::WriteOptions _writeOptions;
 
   std::string _tombstone;
   std::string _nonTombstone;
 
  public:
-  SecondaryIndex(std::string const& folder, uint64_t databaseId,
-                 uint64_t collectionId, uint64_t indexId);
+  SecondaryIndex(uint32_t slug, benchmark::ArangoComparator* cmp);
   ~SecondaryIndex();
 
   static std::string buildPrefix(uint32_t slug);
 
-  bool insert(std::string const& key, uint64_t revision,
-              VPackSlice const& value, bool tombstone);
-  bool remove(std::string const& key, uint64_t revision,
-              VPackSlice const& value);
-  std::vector<uint64_t> lookup(VPackSlice const& start, VPackSlice const& end,
+  bool insert(rocksdb::Transaction* tx, std::string const& key,
+              uint64_t revision, VPackSlice const& value, bool tombstone);
+  bool remove(rocksdb::Transaction* tx, std::string const& key,
+              uint64_t revision, VPackSlice const& value);
+  std::vector<uint64_t> lookup(rocksdb::Transaction* tx,
+                               VPackSlice const& start, VPackSlice const& end,
                                uint64_t maxRevision) const;
 
  private:

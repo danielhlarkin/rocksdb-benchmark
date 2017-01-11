@@ -1,13 +1,9 @@
 #include <benchmark/SecondaryIndex.h>
 
 using namespace benchmark;
-SecondaryIndex::SecondaryIndex(std::string const& folder, uint64_t databaseId,
-                               uint64_t collectionId, uint64_t indexId)
-    : _instance(folder),
-      _db(_instance.db()),
-      _cmp(_instance.comparator()),
-      _prefix(buildPrefix(
-          _instance.getIndexSlug(databaseId, collectionId, indexId))),
+SecondaryIndex::SecondaryIndex(uint32_t slug, ArangoComparator* cmp)
+    : _cmp(cmp),
+      _prefix(buildPrefix(slug)),
       _tombstone("1"),
       _nonTombstone("\0") {}
 
@@ -17,13 +13,14 @@ std::string SecondaryIndex::buildPrefix(uint32_t slug) {
   return std::string("i").append(utility::shortToString(slug));
 }
 
-bool SecondaryIndex::insert(std::string const& key, uint64_t revision,
-                            VPackSlice const& value, bool tombstone) {
+bool SecondaryIndex::insert(rocksdb::Transaction* tx, std::string const& key,
+                            uint64_t revision, VPackSlice const& value,
+                            bool tombstone) {
   // uniqueness/validity check
   // seek to maxRevision and work backwards checking tombstone
   std::string keyPrefix = buildKeyPrefix(key, value);
   std::string sentinel = buildKeySentinel(key, value);
-  auto it = _db->NewIterator(_readOptions);
+  auto it = tx->GetIterator(_readOptions);
   for (it->SeekForPrev(sentinel);
        it->Valid() && it->key().starts_with(keyPrefix); it->Prev()) {
     if (sameKey(it, key)) {
@@ -39,19 +36,19 @@ bool SecondaryIndex::insert(std::string const& key, uint64_t revision,
   delete it;
 
   std::string rocksKey = buildKey(key, revision, value);
-  auto status =
-      _db->Put(_writeOptions, rocksKey, tombstone ? _tombstone : _nonTombstone);
+  auto status = tx->Put(rocksKey, tombstone ? _tombstone : _nonTombstone);
   return status.ok();
 }
 
-bool SecondaryIndex::remove(std::string const& key, uint64_t revision,
-                            VPackSlice const& value) {
+bool SecondaryIndex::remove(rocksdb::Transaction* tx, std::string const& key,
+                            uint64_t revision, VPackSlice const& value) {
   std::string rocksKey = buildKey(key, revision, value);
-  auto status = _db->Delete(_writeOptions, rocksKey);
+  auto status = tx->Delete(rocksKey);
   return status.ok();
 }
 
-std::vector<uint64_t> SecondaryIndex::lookup(VPackSlice const& start,
+std::vector<uint64_t> SecondaryIndex::lookup(rocksdb::Transaction* tx,
+                                             VPackSlice const& start,
                                              VPackSlice const& end,
                                              uint64_t maxRevision) const {
   std::vector<uint64_t> revisions;
@@ -60,7 +57,7 @@ std::vector<uint64_t> SecondaryIndex::lookup(VPackSlice const& start,
   std::string valuePrefix = buildValuePrefix(start);
   std::string endSentinel = buildValueSentinel(end);
   rocksdb::Slice prefixSlice(valuePrefix);
-  auto it = _db->NewIterator(_readOptions);
+  auto it = tx->GetIterator(_readOptions);
   for (it->SeekForPrev(endSentinel);
        it->Valid() && (*_cmp).Compare(it->key(), prefixSlice) >= 0;
        it->Prev()) {

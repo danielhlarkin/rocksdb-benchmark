@@ -11,22 +11,19 @@ class StorageEngine {
   typedef arangodb::velocypack::Slice VPackSlice;
   typedef arangodb::velocypack::SliceContainer VPackSliceContainer;
 
-  benchmark::RocksDBInstance _instance;
-  rocksdb::DB* _db;
   std::string _prefix;
   rocksdb::ReadOptions _readOptions;
-  rocksdb::WriteOptions _writeOptions;
 
  public:
-  StorageEngine(std::string const& folder, uint64_t databaseId,
-                uint64_t collectionId);
+  StorageEngine(uint32_t slug);
   ~StorageEngine();
 
   static std::string buildPrefix(uint32_t slug);
 
-  bool insert(uint64_t revision, VPackSlice const& value);
-  bool remove(uint64_t revision);
-  VPackSliceContainer lookup(uint64_t revision) const;
+  bool insert(rocksdb::Transaction* tx, uint64_t revision,
+              VPackSlice const& value);
+  bool remove(rocksdb::Transaction* tx, uint64_t revision);
+  VPackSliceContainer lookup(rocksdb::Transaction* tx, uint64_t revision) const;
 
  private:
   std::string buildKey(uint64_t revision) const;

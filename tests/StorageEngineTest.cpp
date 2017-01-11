@@ -13,7 +13,11 @@ typedef arangodb::velocypack::SliceContainer VPackSliceContainer;
 
 int main(int, char**) {
   std::string folder("/tmp/test_rocksdb-benchmark_storage-engine");
-  StorageEngine engine(folder, 0x0ULL, 0x1ULL);
+  RocksDBInstance instance(folder);
+  auto writeOptions = rocksdb::WriteOptions();
+  auto txOptions = rocksdb::OptimisticTransactionOptions();
+  auto db = instance.db();
+  StorageEngine engine(instance.getDocumentSlug(0x0ULL, 0x1ULL));
   HybridLogicalClock clock;
 
   int count = 100;
@@ -27,22 +31,40 @@ int main(int, char**) {
   std::vector<uint64_t> revisions;
   for (int i = 0; i < count; i++) {
     revisions.emplace_back(clock.getTimeStamp());
-    bool ok = engine.insert(revisions[i], documents[i].slice());
+    auto tx = db->BeginTransaction(writeOptions, txOptions);
+    bool ok = engine.insert(tx, revisions[i], documents[i].slice());
     assert(ok);
+    auto status = tx->Commit();
+    assert(status.ok());
+    delete tx;
     std::cout << "Inserted document " << i << std::endl;
   }
 
   for (int i = 0; i < count; i++) {
-    VPackSliceContainer data = engine.lookup(revisions[i]);
+    auto tx = db->BeginTransaction(writeOptions, txOptions);
+    VPackSliceContainer data = engine.lookup(tx, revisions[i]);
     assert(data.slice() == documents[i].slice());
+    auto status = tx->Commit();
+    assert(status.ok());
+    delete tx;
     std::cout << "Found document " << i << std::endl;
   }
 
   for (int i = 0; i < count; i++) {
-    bool ok = engine.remove(revisions[i]);
+    auto tx = db->BeginTransaction(writeOptions, txOptions);
+    bool ok = engine.remove(tx, revisions[i]);
     assert(ok);
-    VPackSliceContainer data = engine.lookup(revisions[i]);
+    VPackSliceContainer data = engine.lookup(tx, revisions[i]);
     assert(data.slice() == VPackSlice());
+    auto status = tx->Commit();
+    assert(status.ok());
+    delete tx;
+    tx = db->BeginTransaction(writeOptions, txOptions);
+    data = engine.lookup(tx, revisions[i]);
+    assert(data.slice() == VPackSlice());
+    status = tx->Commit();
+    assert(status.ok());
+    delete tx;
     std::cout << "Removed document " << i << std::endl;
   }
 

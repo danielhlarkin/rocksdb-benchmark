@@ -9,7 +9,7 @@ static int remove_directory(const char* path);
 
 Mutex RocksDBInstance::_rocksDbMutex;
 ArangoComparator* RocksDBInstance::_comparator;
-rocksdb::DB* RocksDBInstance::_db = nullptr;
+rocksdb::OptimisticTransactionDB* RocksDBInstance::_db = nullptr;
 uint32_t RocksDBInstance::_maxSlug = 0;
 std::atomic<uint64_t> RocksDBInstance::_instanceCount(0);
 
@@ -62,12 +62,14 @@ rocksdb::Options RocksDBInstance::generateOptions() {
 RocksDBInstance::RocksDBInstance(std::string const& folder)
     : _dbFolder(folder),
       _readOptions(rocksdb::ReadOptions()),
-      _writeOptions(rocksdb::WriteOptions()) {
+      _writeOptions(rocksdb::WriteOptions()),
+      _txOptions(rocksdb::OptimisticTransactionOptions()) {
   MUTEX_LOCKER(locker, _rocksDbMutex);
   if (_db == nullptr) {
     _comparator = new ArangoComparator();
     auto options = generateOptions();
-    auto status = rocksdb::DB::Open(options, _dbFolder, &_db);
+    auto status =
+        rocksdb::OptimisticTransactionDB::Open(options, _dbFolder, &_db);
     if (!status.ok()) {
       std::cerr << status.ToString() << std::endl;
     }
@@ -89,7 +91,7 @@ RocksDBInstance::~RocksDBInstance() {
   }
 }
 
-rocksdb::DB* RocksDBInstance::db() { return _db; }
+rocksdb::OptimisticTransactionDB* RocksDBInstance::db() { return _db; }
 ArangoComparator* RocksDBInstance::comparator() { return _comparator; }
 
 uint32_t RocksDBInstance::getDocumentSlug(uint64_t databaseId,
@@ -98,18 +100,31 @@ uint32_t RocksDBInstance::getDocumentSlug(uint64_t databaseId,
                             .append(utility::intToString(databaseId))
                             .append(utility::intToString(collectionId));
   std::string slugSlice;
+  auto tx = _db->BeginTransaction(_writeOptions, _txOptions);
 
-  auto status = _db->Get(_readOptions, slugKey, &slugSlice);
+  auto status = tx->Get(_readOptions, slugKey, &slugSlice);
   if (status.ok()) {
+    delete tx;
     return *reinterpret_cast<uint32_t const*>(slugSlice.data());
   }
 
   MUTEX_LOCKER(lock, _rocksDbMutex);
   slugSlice = utility::shortToString(++_maxSlug);
-  status = _db->Put(_writeOptions, slugKey, slugSlice);
+  status = tx->Put(slugKey, slugSlice);
   if (!status.ok()) {
+    tx->Rollback();
+    delete tx;
     return 0;
   }
+
+  status = tx->Commit();
+  if (!status.ok()) {
+    tx->Rollback();
+    delete tx;
+    return 0;
+  }
+  delete tx;
+
   return _maxSlug;
 }
 
@@ -121,29 +136,44 @@ uint32_t RocksDBInstance::getIndexSlug(uint64_t databaseId,
                             .append(utility::intToString(collectionId))
                             .append(utility::intToString(indexId));
   std::string slugSlice;
+  auto tx = _db->BeginTransaction(_writeOptions, _txOptions);
 
-  auto status = _db->Get(_readOptions, slugKey, &slugSlice);
+  auto status = tx->Get(_readOptions, slugKey, &slugSlice);
   if (status.ok()) {
     return *reinterpret_cast<uint32_t const*>(slugSlice.data());
   }
 
   MUTEX_LOCKER(lock, _rocksDbMutex);
   slugSlice = utility::shortToString(++_maxSlug);
-  status = _db->Put(_writeOptions, slugKey, slugSlice);
+  status = tx->Put(slugKey, slugSlice);
   if (!status.ok()) {
+    tx->Rollback();
+    delete tx;
     return 0;
   }
+
+  status = tx->Commit();
+  if (!status.ok()) {
+    tx->Rollback();
+    delete tx;
+    return 0;
+  }
+  delete tx;
+
   return _maxSlug;
 }
 
 void RocksDBInstance::getMaxSlug() {
-  auto it = _db->NewIterator(_readOptions);
+  auto tx = _db->BeginTransaction(_writeOptions, _txOptions);
+  auto it = tx->GetIterator(_readOptions);
   for (it->Seek("S"); it->Valid() && it->key().starts_with("S"); it->Next()) {
     uint32_t current = utility::stringToShort(it->value().data());
     if (current > _maxSlug) {
       _maxSlug = current;
     }
   }
+  delete it;
+  delete tx;
 }
 
 static int remove_directory(const char* path) {

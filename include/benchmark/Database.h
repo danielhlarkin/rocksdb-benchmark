@@ -4,6 +4,7 @@
 #include <benchmark/HybridLogicalClock.h>
 #include <benchmark/PrimaryIndex.h>
 #include <benchmark/RandomNumber.h>
+#include <benchmark/RocksDBInstance.h>
 #include <benchmark/SecondaryIndex.h>
 #include <benchmark/StorageEngine.h>
 #include <velocypack/vpack.h>
@@ -24,6 +25,14 @@ class Database {
   uint64_t _collectionId;
   uint64_t _primaryIndexId;
   uint64_t _secondaryIndexId;
+
+  benchmark::RocksDBInstance _instance;
+  rocksdb::OptimisticTransactionDB* _db;
+  ArangoComparator* _cmp;
+  std::string _prefix;
+  rocksdb::WriteOptions _writeOptions;
+  rocksdb::OptimisticTransactionOptions _txOptions;
+
   benchmark::StorageEngine _storageEngine;
   benchmark::PrimaryIndex _primaryIndex;
   benchmark::SecondaryIndex _secondaryIndex;
@@ -35,12 +44,19 @@ class Database {
   uint64_t now();
 
   uint64_t insert(std::string const& key, VPackSlice const& value);
+  std::vector<uint64_t> insertBatch(
+      std::vector<std::string> const& keys,
+      std::vector<VPackSliceContainer> const& values);
   bool remove(std::string const& key);
   VPackSliceContainer lookupSingle(std::string const& key,
                                    uint64_t maxRevision) const;
   std::vector<VPackSliceContainer> lookupRange(VPackSlice const& start,
                                                VPackSlice const& end,
                                                uint64_t maxRevision) const;
+
+ private:
+  bool insertInternal(rocksdb::Transaction* tx, uint64_t revision,
+                      std::string const& key, VPackSlice const& value);
 };
 }
 

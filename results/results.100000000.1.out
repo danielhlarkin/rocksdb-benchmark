@@ -1,0 +1,39 @@
+BENCHMARKING ROCKSDB WITH PARAMETERS {
+  threadCount: 1,
+  keyCount: 100000000,
+  lookupCount: 0,
+  hotsetCount: 0,
+  rangeLimit: 0
+  folder: /tmp/test_rocksdb-benchmark_benchmark
+}
+WORKLOAD: BATCH INSERTION
+  Insertion of 100000000 documents in parallel random fashion
+  USAGE STATISTICS
+    Resident Memory: {
+      50th: 170.2MB,
+      95th: 207.1MB,
+      99th: 215.6MB
+    }
+    Virtual Memory: {
+      50th: 292.6MB,
+      95th: 300.6MB,
+      99th: 300.6MB
+    }
+    Disk Space: {
+      50th: 6.2GB,
+      95th: 10.6GB,
+      99th: 11.0GB
+    }
+  OPERATION STATISTICS
+    Total Operations: 100000000
+    Total Time: 3.9h
+    Throughput: 7119.7ops/s
+    Latencies: {
+      insert: {
+        50.0th: 120.8μs,
+        75.0th: 137.0μs,
+        95.0th: 222.2μs,
+        99.0th: 364.5μs,
+        99.9th: 655.4μs
+      }
+    }
