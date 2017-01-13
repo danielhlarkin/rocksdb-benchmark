@@ -36,6 +36,8 @@ class ArangoComparator final : public rocksdb::Comparator {
                           rocksdb::Slice const& rhs) const;
   int compareSlugEntries(rocksdb::Slice const& lhs,
                          rocksdb::Slice const& rhs) const;
+  int compareLexicographic(rocksdb::Slice const& lhs,
+                           rocksdb::Slice const& rhs) const;
   int compareSlices(VPackSlice const& lhs, VPackSlice const& rhs) const;
   VPackSlice extractKeySlice(rocksdb::Slice const& slice) const;
 };

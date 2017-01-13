@@ -28,7 +28,7 @@ int ArangoComparator::Compare(rocksdb::Slice const& lhs,
     case 'S': {
       return compareSlugEntries(lhs, rhs);
     }
-    default: { return 0; }
+    default: { return compareLexicographic(lhs, rhs); }
   }
 }
 
@@ -103,15 +103,23 @@ int ArangoComparator::compareIndexEntries(rocksdb::Slice const& lhs,
                        offset - sliceOffset;
 
   result = memcmp(lBase, rBase, minLength);
-  if (result != 0) {
+  if (result != 0 || (lhs.size() == rhs.size())) {
     return result;
   }
 
-  if (lhs.size() == rhs.size()) {
-    return 0;
+  return ((lhs.size() < rhs.size()) ? -1 : 1);
+}
+
+int ArangoComparator::compareLexicographic(rocksdb::Slice const& lhs,
+                                           rocksdb::Slice const& rhs) const {
+  size_t minLength = (lhs.size() < rhs.size()) ? lhs.size() : rhs.size();
+
+  int result = memcmp(lhs.data(), rhs.data(), minLength);
+  if (result != 0 || lhs.size() == rhs.size()) {
+    return result;
   }
 
-  return (lhs.size() < rhs.size()) ? -1 : 1;
+  return ((lhs.size() < rhs.size()) ? -1 : 1);
 }
 
 static int8_t const TypeWeights[256] = {
