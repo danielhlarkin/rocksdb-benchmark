@@ -15,7 +15,7 @@ int main(int, char**) {
   std::string folder("/tmp/test_rocksdb-benchmark_storage-engine");
   RocksDBInstance instance(folder);
   auto writeOptions = rocksdb::WriteOptions();
-  auto txOptions = rocksdb::OptimisticTransactionOptions();
+  auto txOptions = rocksdb::TransactionOptions();
   auto db = instance.db();
   StorageEngine engine(instance.getDocumentSlug(0x0ULL, 0x1ULL));
   HybridLogicalClock clock;

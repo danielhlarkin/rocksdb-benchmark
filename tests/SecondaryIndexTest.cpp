@@ -16,7 +16,7 @@ int main(int, char**) {
   std::string folder("/tmp/test_rocksdb-benchmark_secondary-index");
   RocksDBInstance instance(folder);
   auto writeOptions = rocksdb::WriteOptions();
-  auto txOptions = rocksdb::OptimisticTransactionOptions();
+  auto txOptions = rocksdb::TransactionOptions();
   auto db = instance.db();
   auto cmp = instance.comparator();
   SecondaryIndex index(instance.getIndexSlug(0x0ULL, 0x1ULL, 0x2ULL), cmp);

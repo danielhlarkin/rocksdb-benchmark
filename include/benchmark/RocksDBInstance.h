@@ -11,8 +11,8 @@
 #include <rocksdb/options.h>
 #include <rocksdb/slice_transform.h>
 #include <rocksdb/table.h>
-#include <rocksdb/utilities/optimistic_transaction_db.h>
 #include <rocksdb/utilities/transaction.h>
+#include <rocksdb/utilities/transaction_db.h>
 #include <stdint.h>
 #include <cassert>
 #include <iostream>
@@ -24,19 +24,19 @@ class RocksDBInstance {
  private:
   static benchmark::Mutex _rocksDbMutex;
   static ArangoComparator* _comparator;
-  static rocksdb::OptimisticTransactionDB* _db;  // single global instance
-  static uint32_t _maxSlug;                      // maximum slug granted
-  static std::atomic<uint64_t> _instanceCount;   // number of active maps
+  static rocksdb::TransactionDB* _db;           // single global instance
+  static uint32_t _maxSlug;                     // maximum slug granted
+  static std::atomic<uint64_t> _instanceCount;  // number of active maps
   std::string _dbFolder;
   rocksdb::ReadOptions _readOptions;
   rocksdb::WriteOptions _writeOptions;
-  rocksdb::OptimisticTransactionOptions _txOptions;
+  rocksdb::TransactionOptions _txOptions;
 
  public:
   RocksDBInstance(std::string const& folder);
   ~RocksDBInstance();
 
-  rocksdb::OptimisticTransactionDB* db();
+  rocksdb::TransactionDB* db();
   ArangoComparator* comparator();
 
   uint32_t getDocumentSlug(uint64_t databaseId, uint64_t collectionId);

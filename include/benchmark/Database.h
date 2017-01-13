@@ -27,11 +27,11 @@ class Database {
   uint64_t _secondaryIndexId;
 
   benchmark::RocksDBInstance _instance;
-  rocksdb::OptimisticTransactionDB* _db;
+  rocksdb::TransactionDB* _db;
   ArangoComparator* _cmp;
   std::string _prefix;
   rocksdb::WriteOptions _writeOptions;
-  rocksdb::OptimisticTransactionOptions _txOptions;
+  rocksdb::TransactionOptions _txOptions;
 
   benchmark::StorageEngine _storageEngine;
   benchmark::PrimaryIndex _primaryIndex;

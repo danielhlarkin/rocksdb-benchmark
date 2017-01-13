@@ -12,7 +12,7 @@ Database::Database(std::string const& folder)
       _db(_instance.db()),
       _cmp(_instance.comparator()),
       _writeOptions(rocksdb::WriteOptions()),
-      _txOptions(rocksdb::OptimisticTransactionOptions()),
+      _txOptions(rocksdb::TransactionOptions()),
       _storageEngine(_instance.getDocumentSlug(_databaseId, _collectionId)),
       _primaryIndex(
           _instance.getIndexSlug(_databaseId, _collectionId, _primaryIndexId)),

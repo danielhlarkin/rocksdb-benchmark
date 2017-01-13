@@ -9,7 +9,7 @@ static int remove_directory(const char* path);
 
 Mutex RocksDBInstance::_rocksDbMutex;
 ArangoComparator* RocksDBInstance::_comparator;
-rocksdb::OptimisticTransactionDB* RocksDBInstance::_db = nullptr;
+rocksdb::TransactionDB* RocksDBInstance::_db = nullptr;
 uint32_t RocksDBInstance::_maxSlug = 0;
 std::atomic<uint64_t> RocksDBInstance::_instanceCount(0);
 
@@ -63,13 +63,13 @@ RocksDBInstance::RocksDBInstance(std::string const& folder)
     : _dbFolder(folder),
       _readOptions(rocksdb::ReadOptions()),
       _writeOptions(rocksdb::WriteOptions()),
-      _txOptions(rocksdb::OptimisticTransactionOptions()) {
+      _txOptions(rocksdb::TransactionOptions()) {
   MUTEX_LOCKER(locker, _rocksDbMutex);
   if (_db == nullptr) {
     _comparator = new ArangoComparator();
     auto options = generateOptions();
-    auto status =
-        rocksdb::OptimisticTransactionDB::Open(options, _dbFolder, &_db);
+    auto status = rocksdb::TransactionDB::Open(
+        options, rocksdb::TransactionDBOptions(), _dbFolder, &_db);
     if (!status.ok()) {
       std::cerr << status.ToString() << std::endl;
     }
@@ -91,7 +91,7 @@ RocksDBInstance::~RocksDBInstance() {
   }
 }
 
-rocksdb::OptimisticTransactionDB* RocksDBInstance::db() { return _db; }
+rocksdb::TransactionDB* RocksDBInstance::db() { return _db; }
 ArangoComparator* RocksDBInstance::comparator() { return _comparator; }
 
 uint32_t RocksDBInstance::getDocumentSlug(uint64_t databaseId,
