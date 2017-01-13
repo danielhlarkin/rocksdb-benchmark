@@ -1,41 +1,36 @@
-#include <benchmark/RandomLookup.h>
+#include <benchmark/LookupSingleRandom.h>
 #include <chrono>
 #include <thread>
 
 using namespace benchmark;
 
-RandomLookup::RandomLookup(WorkloadInitializationData const& data)
+LookupSingleRandom::LookupSingleRandom(WorkloadInitializationData const& data)
     : Workload(data) {}
 
-RandomLookup::~RandomLookup() {}
+LookupSingleRandom::~LookupSingleRandom() {}
 
-std::string RandomLookup::resultsHeader() {
-  return std::string("WORKLOAD: RANDOM LOOKUP")
-      .append("\n")
-      .append("  Lookup of ")
-      .append(std::to_string(_lookupCount))
-      .append(" random documents in parallel");
-}
-
-std::string RandomLookup::operationName() {
+std::string LookupSingleRandom::operationName() {
   return std::string("lookupSingle");
 }
 
-void* RandomLookup::generateWorkerInput(uint64_t i) {
+void* LookupSingleRandom::generateWorkerInput(uint64_t i) {
   uint64_t chunkSize = (_lookupCount / _threadCount);
   if (i == (_threadCount - 1)) {
     chunkSize = _lookupCount - (chunkSize * (_threadCount - 1));
   }
 
-  return new RandomLookupInput(_db, _keyCount, chunkSize, &_opCount,
-                               &_workersDone, &_workersErrored);
+  return new LookupSingleRandomInput(_db, _keyCount, chunkSize, &_opCount,
+                                     &_workersDone, &_workersErrored);
 }
 
-RandomLookup::WorkerType RandomLookup::worker() { return lookupRandom; }
+LookupSingleRandom::WorkerType LookupSingleRandom::worker() {
+  return lookupRandom;
+}
 
-void RandomLookup::lookupRandom(void* input, qdigest::QDigest* opDigest,
-                                timepoint* start, timepoint* end) {
-  RandomLookupInput* parameters = reinterpret_cast<RandomLookupInput*>(input);
+void LookupSingleRandom::lookupRandom(void* input, qdigest::QDigest* opDigest,
+                                      timepoint* start, timepoint* end) {
+  LookupSingleRandomInput* parameters =
+      reinterpret_cast<LookupSingleRandomInput*>(input);
   Database* db = parameters->db;
   uint64_t keyCount = parameters->keyCount;
   uint64_t lookupCount = parameters->lookupCount;
@@ -64,7 +59,7 @@ void RandomLookup::lookupRandom(void* input, qdigest::QDigest* opDigest,
     (*workersDone)++;
     return;
   } catch (...) {
-    std::cout << "WORKER FAILED" << std::endl;
+    std::cerr << "WORKER FAILED" << std::endl;
     (*workersErrored)++;
   }
 }

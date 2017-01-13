@@ -16,6 +16,7 @@ Workload::Workload(WorkloadInitializationData const& data,
       _lookupCount(data.lookupCount),
       _hotsetCount(data.hotsetCount),
       _rangeLimit(data.rangeLimit),
+      _transactionSize(data.transactionSize),
       _folder(data.folder),
       _workersDone(0),
       _workersErrored(0),
@@ -77,67 +78,67 @@ bool Workload::run() {
   return (_workersDone.load() == _threadCount && _workersErrored.load() == 0);
 }
 
-void Workload::printHeader() { std::cout << resultsHeader() << std::endl; }
-
-void Workload::printResults() {
-  printUsageStatistics();
-  printOpStatistics();
+void Workload::printResults(VPackBuilder& builder) {
+  builder.add(VPackValue(VPackValueType::Object));
+  builder.add("name", VPackValue(operationName()));
+  printUsageStatistics(builder);
+  printOpStatistics(builder);
+  builder.close();
 }
 
 std::time_t Workload::minTimestamp() { return _minTimestamp; }
 
 std::time_t Workload::maxTimestamp() { return _maxTimestamp; }
 
-void Workload::printUsageStatistics() {
-  std::string resi50 = readableSpace(_residentDigest.percentile(0.50));
-  std::string resi95 = readableSpace(_residentDigest.percentile(0.95));
-  std::string resi99 = readableSpace(_residentDigest.percentile(0.99));
-  std::string virt50 = readableSpace(_virtualDigest.percentile(0.50));
-  std::string virt95 = readableSpace(_virtualDigest.percentile(0.95));
-  std::string virt99 = readableSpace(_virtualDigest.percentile(0.99));
-  std::string disk50 = readableSpace(_diskDigest.percentile(0.50));
-  std::string disk95 = readableSpace(_diskDigest.percentile(0.95));
-  std::string disk99 = readableSpace(_diskDigest.percentile(0.99));
-  std::cout << "  USAGE STATISTICS" << std::endl
-            << "    Resident Memory: {" << std::endl
-            << "      50th: " << resi50 << "," << std::endl
-            << "      95th: " << resi95 << "," << std::endl
-            << "      99th: " << resi99 << std::endl
-            << "    }" << std::endl
-            << "    Virtual Memory: {" << std::endl
-            << "      50th: " << virt50 << "," << std::endl
-            << "      95th: " << virt95 << "," << std::endl
-            << "      99th: " << virt99 << std::endl
-            << "    }" << std::endl
-            << "    Disk Space: {" << std::endl
-            << "      50th: " << disk50 << "," << std::endl
-            << "      95th: " << disk95 << "," << std::endl
-            << "      99th: " << disk99 << std::endl
-            << "    }" << std::endl;
+void Workload::printUsageStatistics(VPackBuilder& builder) {
+  std::vector<std::string> names = {"resident", "virtual", "disk"};
+  std::vector<qdigest::QDigest*> digests = {&_residentDigest, &_virtualDigest,
+                                            &_diskDigest};
+  std::vector<double> percentiles = {0.50, 0.60, 0.70,  0.80,    0.90,
+                                     0.95, 0.99, 0.999, 0.999999};
+
+  builder.add("usage", VPackValue(VPackValueType::Object));
+  for (size_t d = 0; d < digests.size(); d++) {
+    builder.add(names[d], VPackValue(VPackValueType::Object));
+    for (size_t i = 0; i < percentiles.size(); i++) {
+      auto space = readableSpace(digests[d]->percentile(percentiles[i]));
+      builder.add(std::to_string(percentiles[i]),
+                  VPackValue(VPackValueType::Array));
+      builder.add(VPackValue(space.first));
+      builder.add(VPackValue(space.second));
+      builder.close();
+    }
+    builder.close();
+  }
+  builder.close();
 }
 
-void Workload::printOpStatistics() {
-  std::string op500 = readableTime(_opDigest.percentile(0.500));
-  std::string op750 = readableTime(_opDigest.percentile(0.750));
-  std::string op950 = readableTime(_opDigest.percentile(0.950));
-  std::string op990 = readableTime(_opDigest.percentile(0.990));
-  std::string op999 = readableTime(_opDigest.percentile(0.999));
-  std::cout << "  OPERATION STATISTICS" << std::endl
-            << "    Total Operations: " << _opCount.load() << std::endl
-            << "    Total Time: " << readableTime(_duration) << std::endl
-            << "    Throughput: " << throughput() << std::endl
-            << "    Latencies: {" << std::endl
-            << "      " << operationName() << ": {" << std::endl
-            << "        50.0th: " << op500 << "," << std::endl
-            << "        75.0th: " << op750 << "," << std::endl
-            << "        95.0th: " << op950 << "," << std::endl
-            << "        99.0th: " << op990 << "," << std::endl
-            << "        99.9th: " << op999 << std::endl
-            << "      }" << std::endl
-            << "    }" << std::endl;
+void Workload::printOpStatistics(VPackBuilder& builder) {
+  std::vector<double> percentiles = {0.50, 0.60, 0.70,  0.80,    0.90,
+                                     0.95, 0.99, 0.999, 0.999999};
+
+  builder.add("performance", VPackValue(VPackValueType::Object));
+  builder.add("count", VPackValue(_opCount.load()));
+  auto time = readableTime(_duration);
+  builder.add("time", VPackValue(VPackValueType::Array));
+  builder.add(VPackValue(time.first));
+  builder.add(VPackValue(time.second));
+  builder.close();
+  builder.add("throughput", VPackValue(throughput()));
+  builder.add("latencies", VPackValue(VPackValueType::Object));
+  for (size_t i = 0; i < percentiles.size(); i++) {
+    auto time = readableTime(_opDigest.percentile(percentiles[i]));
+    builder.add(std::to_string(percentiles[i]),
+                VPackValue(VPackValueType::Array));
+    builder.add(VPackValue(time.first));
+    builder.add(VPackValue(time.second));
+    builder.close();
+  }
+  builder.close();
+  builder.close();
 }
 
-std::string Workload::readableTime(uint64_t time) {
+std::pair<double, std::string> Workload::readableTime(uint64_t time) {
   double result;
   std::string suffix;
   if (time < 1000) {
@@ -160,12 +161,10 @@ std::string Workload::readableTime(uint64_t time) {
     suffix = "h";
   }
 
-  std::stringstream ss;
-  ss << std::fixed << std::setprecision(1) << result;
-  return ss.str().append(suffix);
+  return std::pair<double, std::string>(result, suffix);
 }
 
-std::string Workload::readableSpace(uint64_t space) {
+std::pair<double, std::string> Workload::readableSpace(uint64_t space) {
   double result;
   std::string suffix;
   if (space < 1024) {
@@ -182,17 +181,14 @@ std::string Workload::readableSpace(uint64_t space) {
     suffix = "TB";
   }
 
-  std::stringstream ss;
-  ss << std::fixed << std::setprecision(1) << result;
-  return ss.str().append(suffix);
+  return std::pair<double, std::string>(result, suffix);
 }
 
-std::string Workload::throughput() {
+double Workload::throughput() {
   if (_duration == 0 || _opCount.load() == 0) {
-    return std::string("N/A");
+    return -1;
   }
   double throughput = (_opCount.load() / (_duration / 1000000000.0));
-  std::stringstream ss;
-  ss << std::fixed << std::setprecision(1) << throughput;
-  return ss.str().append("ops/s");
+
+  return throughput;
 }

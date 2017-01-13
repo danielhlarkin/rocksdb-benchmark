@@ -1,4 +1,4 @@
-#include <benchmark/BatchInsert.h>
+#include <benchmark/Insert.h>
 #include <chrono>
 #include <thread>
 
@@ -7,22 +7,13 @@ using namespace benchmark;
 static uint64_t gcd(uint64_t u, uint64_t v);
 static uint64_t relativePrime(uint64_t n);
 
-BatchInsert::BatchInsert(WorkloadInitializationData const& data)
-    : Workload(data) {}
+Insert::Insert(WorkloadInitializationData const& data) : Workload(data) {}
 
-BatchInsert::~BatchInsert() {}
+Insert::~Insert() {}
 
-std::string BatchInsert::resultsHeader() {
-  return std::string("WORKLOAD: BATCH INSERTION")
-      .append("\n")
-      .append("  Insertion of ")
-      .append(std::to_string(_keyCount))
-      .append(" documents in parallel random fashion");
-}
+std::string Insert::operationName() { return std::string("insert"); }
 
-std::string BatchInsert::operationName() { return std::string("insert"); }
-
-void* BatchInsert::generateWorkerInput(uint64_t i) {
+void* Insert::generateWorkerInput(uint64_t i) {
   uint64_t chunkSize = (_keyCount / _threadCount);
   uint64_t lower = (i * chunkSize) + 1;
   uint64_t upper = (i + 1) * chunkSize;
@@ -30,16 +21,16 @@ void* BatchInsert::generateWorkerInput(uint64_t i) {
     upper = _keyCount;
   }
 
-  return new BatchInsertInput(_db, &_lock, lower, upper, &_minTimestamp,
-                              &_maxTimestamp, &_opCount, &_workersDone,
-                              &_workersErrored);
+  return new InsertInput(_db, &_lock, lower, upper, &_minTimestamp,
+                         &_maxTimestamp, &_opCount, &_workersDone,
+                         &_workersErrored);
 }
 
-BatchInsert::WorkerType BatchInsert::worker() { return insertBatch; }
+Insert::WorkerType Insert::worker() { return insertBatch; }
 
-void BatchInsert::insertBatch(void* input, qdigest::QDigest* opDigest,
-                              timepoint* start, timepoint* end) {
-  BatchInsertInput* parameters = reinterpret_cast<BatchInsertInput*>(input);
+void Insert::insertBatch(void* input, qdigest::QDigest* opDigest,
+                         timepoint* start, timepoint* end) {
+  InsertInput* parameters = reinterpret_cast<InsertInput*>(input);
   Database* db = parameters->db;
   Mutex* lock = parameters->lock;
   uint64_t lower = parameters->lower;
@@ -73,7 +64,7 @@ void BatchInsert::insertBatch(void* input, qdigest::QDigest* opDigest,
       uint64_t r = db->insert(key, document.slice());
       auto end = std::chrono::high_resolution_clock::now();
       if (r == 0) {
-        std::cout << "FAILED TO INSERT " << key << std::endl;
+        std::cerr << "FAILED TO INSERT " << key << std::endl;
       }
       assert(r > 0);
 

@@ -1,27 +1,18 @@
-#include <benchmark/RangeLookup.h>
+#include <benchmark/LookupRange.h>
 #include <chrono>
 #include <thread>
 
 using namespace benchmark;
 
-RangeLookup::RangeLookup(WorkloadInitializationData const& data,
+LookupRange::LookupRange(WorkloadInitializationData const& data,
                          std::time_t minTimestamp, std::time_t maxTimestamp)
     : Workload(data, minTimestamp, maxTimestamp) {}
 
-RangeLookup::~RangeLookup() {}
+LookupRange::~LookupRange() {}
 
-std::string RangeLookup::resultsHeader() {
-  return std::string("WORKLOAD: RANGE LOOKUP")
-      .append("\n")
-      .append("  Lookup of documents by timestamp range in parallel using a ")
-      .append("rough limit of ")
-      .append(std::to_string(_rangeLimit))
-      .append(" documents per thread.");
-}
+std::string LookupRange::operationName() { return std::string("lookupRange"); }
 
-std::string RangeLookup::operationName() { return std::string("lookupRange"); }
-
-void* RangeLookup::generateWorkerInput(uint64_t i) {
+void* LookupRange::generateWorkerInput(uint64_t i) {
   uint64_t estimatedCount = (_keyCount / _threadCount);
   std::time_t chunkTime = ((_maxTimestamp - _minTimestamp) / _threadCount);
   std::time_t lower = _minTimestamp + (i * chunkTime);
@@ -33,15 +24,15 @@ void* RangeLookup::generateWorkerInput(uint64_t i) {
     upper = _maxTimestamp;
   }
 
-  return new RangeLookupInput(_db, estimatedCount, _rangeLimit, lower, upper,
+  return new LookupRangeInput(_db, estimatedCount, _rangeLimit, lower, upper,
                               &_opCount, &_workersDone, &_workersErrored);
 }
 
-RangeLookup::WorkerType RangeLookup::worker() { return lookupRanges; }
+LookupRange::WorkerType LookupRange::worker() { return lookupRanges; }
 
-void RangeLookup::lookupRanges(void* input, qdigest::QDigest* opDigest,
+void LookupRange::lookupRanges(void* input, qdigest::QDigest* opDigest,
                                timepoint* start, timepoint* end) {
-  RangeLookupInput* parameters = reinterpret_cast<RangeLookupInput*>(input);
+  LookupRangeInput* parameters = reinterpret_cast<LookupRangeInput*>(input);
   Database* db = parameters->db;
   uint64_t expectedCount = parameters->expectedCount;
   uint64_t rangeLimit = parameters->rangeLimit;
@@ -96,7 +87,7 @@ void RangeLookup::lookupRanges(void* input, qdigest::QDigest* opDigest,
     (*workersDone)++;
     return;
   } catch (...) {
-    std::cout << "WORKER FAILED" << std::endl;
+    std::cerr << "WORKER FAILED" << std::endl;
     (*workersErrored)++;
   }
 }

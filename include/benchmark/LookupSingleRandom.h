@@ -1,21 +1,22 @@
-#ifndef ROCKSDB_BENCHMARK_RANDOM_LOOKUP_H
-#define ROCKSDB_BENCHMARK_RANDOM_LOOKUP_H 1
+#ifndef ROCKSDB_BENCHMARK_LOOKUP_SINGLE_RANDOM_H
+#define ROCKSDB_BENCHMARK_LOOKUP_SINGLE_RANDOM_H 1
 
 #include <benchmark/RandomNumber.h>
 #include <benchmark/Workload.h>
 
 namespace benchmark {
 
-struct RandomLookupInput {
+struct LookupSingleRandomInput {
   benchmark::Database* db;
   uint64_t keyCount;
   uint64_t lookupCount;
   std::atomic<uint64_t>* opCount;
   std::atomic<uint64_t>* workersDone;
   std::atomic<uint64_t>* workersErrored;
-  RandomLookupInput(benchmark::Database* d, uint64_t k, uint64_t l,
-                    std::atomic<uint64_t>* ops, std::atomic<uint64_t>* done,
-                    std::atomic<uint64_t>* errored)
+  LookupSingleRandomInput(benchmark::Database* d, uint64_t k, uint64_t l,
+                          std::atomic<uint64_t>* ops,
+                          std::atomic<uint64_t>* done,
+                          std::atomic<uint64_t>* errored)
       : db(d),
         keyCount(k),
         lookupCount(l),
@@ -24,13 +25,12 @@ struct RandomLookupInput {
         workersErrored(errored) {}
 };
 
-class RandomLookup : public Workload {
+class LookupSingleRandom : public Workload {
  public:
-  RandomLookup(WorkloadInitializationData const& data);
-  ~RandomLookup();
+  LookupSingleRandom(WorkloadInitializationData const& data);
+  ~LookupSingleRandom();
 
  protected:
-  std::string resultsHeader();
   std::string operationName();
 
   void* generateWorkerInput(uint64_t i);

@@ -23,16 +23,17 @@ include_directories(
 add_library(RocksDBBenchmark OBJECT
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/ArangoComparator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/ArangoPrefixTransform.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/BatchInsert.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/Database.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/HotsetLookup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/HybridLogicalClock.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/Insert.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/InsertBatch.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/LookupRange.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/LookupSingleHotset.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/LookupSingleRandom.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/Mutex.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/MutexLocker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/PrimaryIndex.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/RandomLookup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/RandomNumber.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/RangeLookup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/RocksDBInstance.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/SecondaryIndex.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmark/StorageEngine.cpp

@@ -1,43 +1,36 @@
-#include <benchmark/HotsetLookup.h>
+#include <benchmark/LookupSingleHotset.h>
 #include <chrono>
 #include <thread>
 
 using namespace benchmark;
 
-HotsetLookup::HotsetLookup(WorkloadInitializationData const& data)
+LookupSingleHotset::LookupSingleHotset(WorkloadInitializationData const& data)
     : Workload(data) {}
 
-HotsetLookup::~HotsetLookup() {}
+LookupSingleHotset::~LookupSingleHotset() {}
 
-std::string HotsetLookup::resultsHeader() {
-  return std::string("WORKLOAD: HOTSET LOOKUP")
-      .append("\n")
-      .append("  Lookup of ")
-      .append(std::to_string(_lookupCount))
-      .append(" random documents from a hotset of size ")
-      .append(std::to_string(_hotsetCount))
-      .append(" in parallel");
+std::string LookupSingleHotset::operationName() {
+  return std::string("lookupSingleHotset");
 }
 
-std::string HotsetLookup::operationName() {
-  return std::string("lookupSingle");
-}
-
-void* HotsetLookup::generateWorkerInput(uint64_t i) {
+void* LookupSingleHotset::generateWorkerInput(uint64_t i) {
   uint64_t chunkSize = (_lookupCount / _threadCount);
   if (i == (_threadCount - 1)) {
     chunkSize = _lookupCount - (chunkSize * (_threadCount - 1));
   }
 
-  return new HotsetLookupInput(_db, _hotsetCount, chunkSize, &_opCount,
-                               &_workersDone, &_workersErrored);
+  return new LookupSingleHotsetInput(_db, _hotsetCount, chunkSize, &_opCount,
+                                     &_workersDone, &_workersErrored);
 }
 
-HotsetLookup::WorkerType HotsetLookup::worker() { return lookupHotset; }
+LookupSingleHotset::WorkerType LookupSingleHotset::worker() {
+  return lookupHotset;
+}
 
-void HotsetLookup::lookupHotset(void* input, qdigest::QDigest* opDigest,
-                                timepoint* start, timepoint* end) {
-  HotsetLookupInput* parameters = reinterpret_cast<HotsetLookupInput*>(input);
+void LookupSingleHotset::lookupHotset(void* input, qdigest::QDigest* opDigest,
+                                      timepoint* start, timepoint* end) {
+  LookupSingleHotsetInput* parameters =
+      reinterpret_cast<LookupSingleHotsetInput*>(input);
   Database* db = parameters->db;
   uint64_t hotsetCount = parameters->hotsetCount;
   uint64_t lookupCount = parameters->lookupCount;
@@ -66,7 +59,7 @@ void HotsetLookup::lookupHotset(void* input, qdigest::QDigest* opDigest,
     (*workersDone)++;
     return;
   } catch (...) {
-    std::cout << "WORKER FAILED" << std::endl;
+    std::cerr << "WORKER FAILED" << std::endl;
     (*workersErrored)++;
   }
 }

@@ -1,12 +1,12 @@
-#ifndef ROCKSDB_BENCHMARK_RANGE_LOOKUP_H
-#define ROCKSDB_BENCHMARK_RANGE_LOOKUP_H 1
+#ifndef ROCKSDB_BENCHMARK_LOOKUP_RANGE_H
+#define ROCKSDB_BENCHMARK_LOOKUP_RANGE_H 1
 
 #include <benchmark/RandomNumber.h>
 #include <benchmark/Workload.h>
 
 namespace benchmark {
 
-struct RangeLookupInput {
+struct LookupRangeInput {
   benchmark::Database* db;
   uint64_t expectedCount;
   uint64_t rangeLimit;
@@ -15,7 +15,7 @@ struct RangeLookupInput {
   std::atomic<uint64_t>* opCount;
   std::atomic<uint64_t>* workersDone;
   std::atomic<uint64_t>* workersErrored;
-  RangeLookupInput(benchmark::Database* d, uint64_t e, uint64_t r,
+  LookupRangeInput(benchmark::Database* d, uint64_t e, uint64_t r,
                    std::time_t l, std::time_t u, std::atomic<uint64_t>* ops,
                    std::atomic<uint64_t>* done, std::atomic<uint64_t>* errored)
       : db(d),
@@ -28,14 +28,13 @@ struct RangeLookupInput {
         workersErrored(errored) {}
 };
 
-class RangeLookup : public Workload {
+class LookupRange : public Workload {
  public:
-  RangeLookup(WorkloadInitializationData const& data, std::time_t minTimestamp,
+  LookupRange(WorkloadInitializationData const& data, std::time_t minTimestamp,
               std::time_t maxTimestamp);
-  ~RangeLookup();
+  ~LookupRange();
 
  protected:
-  std::string resultsHeader();
   std::string operationName();
 
   void* generateWorkerInput(uint64_t i);

@@ -28,9 +28,10 @@ struct WorkloadInitializationData {
   uint64_t lookupCount;
   uint64_t hotsetCount;
   uint64_t rangeLimit;
+  uint64_t transactionSize;
   std::string folder;
   WorkloadInitializationData(benchmark::Database* d, uint64_t tc, uint64_t kc,
-                             uint64_t lc, uint64_t hc, uint64_t rl,
+                             uint64_t lc, uint64_t hc, uint64_t rl, uint64_t ts,
                              std::string const& f)
       : db(d),
         threadCount(tc),
@@ -38,6 +39,7 @@ struct WorkloadInitializationData {
         lookupCount(lc),
         hotsetCount(hc),
         rangeLimit(rl),
+        transactionSize(ts),
         folder(f) {}
 };
 
@@ -45,6 +47,9 @@ class Workload {
  protected:
   typedef arangodb::velocypack::Slice VPackSlice;
   typedef arangodb::velocypack::SliceContainer VPackSliceContainer;
+  typedef arangodb::velocypack::Builder VPackBuilder;
+  typedef arangodb::velocypack::Value VPackValue;
+  typedef arangodb::velocypack::ValueType VPackValueType;
   typedef std::chrono::time_point<std::chrono::high_resolution_clock> timepoint;
   typedef std::function<void(void*, qdigest::QDigest*, timepoint*, timepoint*)>
       WorkerType;
@@ -64,6 +69,7 @@ class Workload {
   uint64_t _lookupCount;
   uint64_t _hotsetCount;
   uint64_t _rangeLimit;
+  uint64_t _transactionSize;
   std::string _folder;
 
   std::atomic<uint64_t> _workersDone;
@@ -82,26 +88,24 @@ class Workload {
 
  public:
   bool run();
-  void printHeader();
-  void printResults();
+  void printResults(VPackBuilder& builder);
 
   std::time_t minTimestamp();
   std::time_t maxTimestamp();
 
  protected:
-  virtual std::string resultsHeader() = 0;
   virtual std::string operationName() = 0;
 
   virtual void* generateWorkerInput(uint64_t i) = 0;
   virtual WorkerType worker() = 0;
 
-  void printUsageStatistics();
-  void printOpStatistics();
+  void printUsageStatistics(VPackBuilder& builder);
+  void printOpStatistics(VPackBuilder& builder);
 
  private:
-  std::string readableTime(uint64_t time);
-  std::string readableSpace(uint64_t space);
-  std::string throughput();
+  std::pair<double, std::string> readableTime(uint64_t time);
+  std::pair<double, std::string> readableSpace(uint64_t space);
+  double throughput();
 };
 }
 
